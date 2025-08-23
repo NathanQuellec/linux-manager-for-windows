@@ -1,0 +1,12 @@
+﻿using Microsoft.UI.Xaml.Controls;
+
+namespace LinuxManager.Contracts.Services.UserInterface;
+
+public interface IInfoBarService
+{
+    InfoBar FindInfoBar(string infoBarName);
+    void OpenInfoBar(InfoBar infoBar, double time);
+    void OpenInfoBar(InfoBar infoBar);
+    void OpenInfoBar(InfoBar infoBar, string message, double time);
+    void CloseInfoBar(InfoBar infoBar);
+}

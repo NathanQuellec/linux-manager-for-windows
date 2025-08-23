@@ -1,0 +1,115 @@
+<!-- Copyright (c) Microsoft Corporation and Contributors. -->
+<!-- Licensed under the MIT License. -->
+
+<ContentDialog
+    x:Class="LinuxManager.Views.Dialogs.CreateDistributionView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:LinuxManager.Views.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    mc:Ignorable="d"
+
+    Style="{StaticResource DefaultContentDialogStyle}"
+    Title="Create Distribution :"
+    PrimaryButtonText="Create"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary">
+
+    <StackPanel>
+        <TextBox x:Name="DistroNameInput" 
+                 Header="Distribution Name :"
+                 MaxLength="30"
+                 Margin="0 12 0 16"
+                 Height="64"/>
+        <ComboBox x:Name="DistroCreationMode"
+                  Header="Creation Mode :" 
+                  PlaceholderText="Select a mode">
+            <x:String>Docker Hub</x:String>
+            <x:String>Dockerfile</x:String>
+            <x:String>Archive</x:String>
+            <x:String>Vhdx</x:String>
+        </ComboBox>
+
+        <controls:SwitchPresenter Value="{Binding SelectedItem, ElementName=DistroCreationMode}">
+
+            <controls:Case Value="Docker Hub">
+                <Grid x:Name="DockerHubInputContainer" 
+                      Height="96">
+                    <TextBox Header="Docker Hub repository :"
+                             x:Name="DockerHubInput"
+                             PlaceholderText="Example : eclipse/angular:latest"
+                             Height="64"
+                             Margin="0 12 0 16"/>
+                </Grid>
+            </controls:Case>
+
+            <controls:Case Value="Dockerfile">
+                <Grid x:Name="DockerfileInputContainer"
+                      Height="96">
+                    <TextBox Header="Dockerfile root folder path :"
+                             x:Name="DockerfileInput"
+                             Height="64"
+                             Margin="0 12 0 16"/>
+                    <Button HorizontalAlignment="Right"
+                            Style="{StaticResource MinimalistButtonStyle}"
+                            Margin="0 24 0 0 "
+                            Click="PickDockerFileFolder">
+                        <FontIcon Glyph="&#xED25;" />
+                    </Button>
+                </Grid>
+            </controls:Case>
+
+            <controls:Case Value="Archive">
+                <Grid x:Name="ArchiveInputContainer"
+                      Height="96">
+                    <TextBox Header="Archive file path :"
+                             x:Name="ArchiveInput"
+                             PlaceholderText="Only .tar or .tar.gz files"
+                             Height="64"
+                             Margin="0 12 0 16"/>
+                    <Button HorizontalAlignment="Right"
+                            Style="{StaticResource MinimalistButtonStyle}"
+                            Margin="0 24 0 0 "
+                            Click="PickArchiveFile">
+                        <FontIcon Glyph="&#xED25;" />
+                    </Button>
+                </Grid>
+            </controls:Case>
+
+            <controls:Case Value="Vhdx">
+                <Grid x:Name="VhdxInputContainer"
+                      Height="96">
+                    <TextBox Header="Vhdx file path :"
+                             x:Name="VhdxInput"
+                             PlaceholderText="Only WSL .vhdx image files"
+                             Height="64"
+                             Margin="0 12 0 16"/>
+                    <Button HorizontalAlignment="Right"
+                            Style="{StaticResource MinimalistButtonStyle}"
+                            Margin="0 24 0 0 "
+                            Click="PickVhdxFile">
+                        <FontIcon Glyph="&#xED25;" />
+                    </Button>
+                </Grid>
+            </controls:Case>
+        </controls:SwitchPresenter>
+
+        <InfoBar x:Name="DistroNameErrorInfoBar"
+                 Severity="Error"
+                 Title="Invalid : Distribution Name"
+                 IsOpen="False"
+                 IsClosable="False"
+                 Margin="0 12 0 0"/>
+
+        <InfoBar x:Name="CreationModeErrorInfoBar"
+                 Severity="Error"
+                 Title="No creation mode selected"
+                 IsOpen="False"
+                 IsClosable="False"
+                 Margin="0 12 0 0"/>
+
+    </StackPanel>
+
+</ContentDialog>

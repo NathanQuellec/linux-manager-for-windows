@@ -1,0 +1,10 @@
+﻿{
+    "profiles": {
+      "LinuxManager (Package)": {
+        "commandName": "MsixPackage"
+      },
+      "LinuxManager (Unpackaged)": {
+        "commandName": "Project"
+      }
+    }
+}
