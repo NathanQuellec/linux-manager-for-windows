@@ -12,9 +12,9 @@
   IgnorableNamespaces="uap rescap genTemplate desktop6 mp">
 
   <Identity
-    Name="14543NathanQuellec.LinuxManager"
+    Name="14543NathanQuellec.WSLStudio"
     Publisher="CN=BAAB9B9E-CD72-40AB-BE14-24DCE13BA387"
-    Version="0.8.1.0" />
+    Version="0.9.2.0" />
 
   <Properties>
     <DisplayName>Linux Manager</DisplayName>
