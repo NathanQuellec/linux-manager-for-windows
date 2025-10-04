@@ -42,7 +42,7 @@ public class DockerHelper
             string tarName = file.Substring(directory.Length).Replace('\\', '/').TrimStart('/');
 
             //Let's create the entry header
-            var entry = ICSharpCode.SharpZipLib.Tar.TarEntry.CreateTarEntry(tarName);
+            var entry = TarEntry.CreateTarEntry(tarName);
             using var fileStream = File.OpenRead(file);
             entry.Size = fileStream.Length;
             archive.PutNextEntry(entry);
