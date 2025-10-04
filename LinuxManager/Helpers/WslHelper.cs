@@ -13,10 +13,7 @@ public static class WslHelper
 
     public static bool CheckWsl()
     {
-        if (!_wslApi.IsWslSupported() || !_wslApi.IsInstalled)
-            return false;
-
-        return true;
+        return _wslApi.IsWslSupported() && _wslApi.IsInstalled;
     }
 
     public static bool CheckHypervisor()
@@ -44,7 +41,7 @@ public static class WslHelper
     {
         var process = new ProcessBuilder("powershell.exe")
             .SetArguments(
-                "/c  winget ls  -q 'Windows Subsystem for Linux'")
+                "/c  winget ls  -q 'WindowsSubsystemForLinux'")
             .SetUseShellExecute(false)
             .SetRedirectStandardOutput(true)
             .SetRedirectStandardError(true)
