@@ -82,21 +82,4 @@ public sealed partial class DistrosListDetailsView : Page
             FindDistroStopButton(currentChild, searchDistroName);
         }
     }
-
-    //////////////////////////////////////
-    private void MasterListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (MasterListView.SelectedItem is string selectedItem)
-        {
-            //DetailText.Text = $"You selected: {selectedItem}";
-        }
-    }
-
-    private void MasterListView_ItemClick(object sender, ItemClickEventArgs e)
-    {
-        if (e.ClickedItem is string clickedItem)
-        {
-            //DetailText.Text = $"You clicked: {clickedItem}";
-        }
-    }
 }

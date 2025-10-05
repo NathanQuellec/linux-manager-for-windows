@@ -65,10 +65,8 @@
 
                     <ListView x:Name="MasterListView"
                               Grid.Row="0"
-                              SelectionChanged="MasterListView_SelectionChanged"
                               IsItemClickEnabled="True"
                               SelectionMode="Single"
-                              ItemClick="MasterListView_ItemClick"
                               ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}">
 
                         <ListView.ItemTemplate>
