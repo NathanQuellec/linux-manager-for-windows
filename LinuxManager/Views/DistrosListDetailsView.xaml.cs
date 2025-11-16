@@ -21,6 +21,10 @@ namespace LinuxManager.Views;
 public sealed partial class DistrosListDetailsView : Page
 {
     private Button _distroStopButton = new();
+    private Button _distroStartButton = new();
+
+    private StackPanel _distroRunningStatusPanel = new();
+    private StackPanel _distroStoppedStatusPanel = new();
 
     public DistrosListDetailsVM ViewModel
     {
@@ -39,22 +43,26 @@ public sealed partial class DistrosListDetailsView : Page
         {
             Log.Information("[PUB/SUB] Message received to show distribution 'stop' button");
             var distro = message.Distribution;
-            FindDistroStopButton(this, distro.Name);
-            if (_distroStopButton != null)
-            {
-                _distroStopButton.Visibility = Visibility.Visible;
-            }
+            FindDistroButton(this, distro.Name);
+            _distroStartButton.Visibility = Visibility.Collapsed;
+            _distroStopButton.Visibility = Visibility.Visible;
+
+            FindDistroStatusPanel(this, distro.Name);
+            _distroRunningStatusPanel.Visibility = Visibility.Visible;
+            _distroStoppedStatusPanel.Visibility = Visibility.Collapsed;
         });
 
         WeakReferenceMessenger.Default.Register<HideDistroStopButtonMessage>(this, (recipient, message) =>
         {
             Log.Information("[PUB/SUB] Message received to hide distribution 'stop' button");
             var distro = message.Distribution;
-            FindDistroStopButton(this, distro.Name);
-            if (_distroStopButton != null)
-            {
-                _distroStopButton.Visibility = Visibility.Collapsed;
-            }
+            FindDistroButton(this, distro.Name);
+            _distroStopButton.Visibility = Visibility.Collapsed;
+            _distroStartButton.Visibility = Visibility.Visible;
+
+            FindDistroStatusPanel(this, distro.Name);
+            _distroRunningStatusPanel.Visibility = Visibility.Collapsed;
+            _distroStoppedStatusPanel.Visibility = Visibility.Visible;
         });
 
         //Close InfoBar after timer set in DistroListDetailsViewModel.cs
@@ -70,16 +78,42 @@ public sealed partial class DistrosListDetailsView : Page
      * We need to go through the Visual Tree recursively to find the Tag that matches the Distro Name received,
      * as we cannot set a dynamic x:Name property for the Stop button.
      */
-    private void FindDistroStopButton(DependencyObject parent, string searchDistroName)
+    private void FindDistroButton(DependencyObject parent, string searchDistroName)
     {
-        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
         {
             var currentChild = VisualTreeHelper.GetChild(parent, i);
-            if (currentChild != null && currentChild is Button btn && (string)btn.Tag == $"Stop_{searchDistroName}")
+            if (currentChild != null && currentChild is Button stopButton && 
+                (string)stopButton.Tag == $"STOP_{searchDistroName}")
             {
-                _distroStopButton = btn;
+                _distroStopButton = stopButton;
             }
-            FindDistroStopButton(currentChild, searchDistroName);
+            else if (currentChild != null && currentChild is Button startButton &&
+                     (string)startButton.Tag == $"START_{searchDistroName}")
+            {
+                _distroStartButton = startButton;
+            } 
+            FindDistroButton(currentChild, searchDistroName);
+        }
+    }
+
+
+    private void FindDistroStatusPanel(DependencyObject parent, string searchDistroName)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var currentChild = VisualTreeHelper.GetChild(parent, i);
+            if (currentChild != null && currentChild is StackPanel runningPanel &&
+                (string)runningPanel.Tag == $"RUNNING_{searchDistroName}")
+            {
+                _distroRunningStatusPanel = runningPanel;
+            }
+            else if (currentChild != null && currentChild is StackPanel stoppedPanel &&
+                     (string)stoppedPanel.Tag == $"STOPPED_{searchDistroName}")
+            {
+                _distroStoppedStatusPanel = stoppedPanel;
+            }
+            FindDistroStatusPanel(currentChild, searchDistroName);
         }
     }
 }

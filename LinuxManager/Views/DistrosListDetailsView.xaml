@@ -53,7 +53,7 @@
         <SplitView Grid.Row="1"
                    DisplayMode="Inline"
                    IsPaneOpen="True"
-                   OpenPaneLength="280"
+                   OpenPaneLength="300"
                    Margin="0 0 0 0"
                    PaneBackground="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
                    BorderThickness="0 0 1 0"
@@ -65,10 +65,12 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Spacing="16"
+                    <StackPanel Grid.Row="0"
+                                Spacing="16"
                                 BorderThickness="0 0 0 1"
                                 BorderBrush="#3F3F3F">
                         <StackPanel Margin="20 0 0 0">
@@ -84,17 +86,33 @@
 
                         <Button Content="+  Install Distribution"
                                 HorizontalAlignment="Stretch"
-                                Height="36"
+                                Height="28"
                                 Background="{ThemeResource AccentFillColorDefaultBrush}"
                                 Foreground="Black"
                                 CornerRadius="4"
                                 FontWeight="SemiBold"
-                                Margin="20 0 12 16"
+                                FontSize="12"
+                                Margin="20 0 20 16"
                                 Command="{Binding ElementName=Page, Path=ViewModel.CreateDistroCommand}"/>
                     </StackPanel>
 
+                    <StackPanel Grid.Row="1"
+                                Orientation="Horizontal"
+                                Spacing="180"
+                                Margin="20 8 0 0">
+                        <TextBlock Text="DISTRIBUTIONS"
+                                   FontSize="10"
+                                   FontWeight="Medium"
+                                   Foreground="{ThemeResource SystemColorGrayTextColor}" />
+
+                        <TextBlock Text="{Binding ElementName=Page, Path=ViewModel.Distros.Count, Mode=TwoWay}"
+                                   FontSize="10"
+                                   Foreground="{ThemeResource SystemColorGrayTextColor}" />
+
+                    </StackPanel>
+
                     <ListView x:Name="MasterListView"
-                              Grid.Row="1"
+                              Grid.Row="2"
                               IsItemClickEnabled="True"
                               SelectionMode="Single"
                               ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}">
@@ -152,21 +170,22 @@
                                             <ToolTip Content="Right-Click" />
                                         </ToolTipService.ToolTip>
 
-                                        <!-- Launch Button -->
+                                        <!-- Launch Button with unique tag -->
                                         <Button x:Name="LaunchButton"
                                                 Style="{StaticResource MinimalistButtonStyle}"
+                                                Tag="{x:Bind Path=system:String.Format('START_{0}', Name), Mode=OneWay}"
                                                 Margin="0 12 0 0"
                                                 Command="{Binding ElementName=Page, Path=ViewModel.LaunchDistroCommand}"
                                                 CommandParameter="{x:Bind}">
                                             <FontIcon Glyph="&#xE768;"
-                                                      FontSize="24" />
+                                                      FontSize="24"/>
                                         </Button>
 
                                         <!-- Stop Button with unique tag -->
                                         <Button x:Name="StopButton"
                                                 RelativePanel.RightOf="LaunchButton"
                                                 Style="{StaticResource MinimalistButtonStyle}"
-                                                Tag="{x:Bind Path=system:String.Format('Stop_{0}', Name), Mode=OneWay}"
+                                                Tag="{x:Bind Path=system:String.Format('STOP_{0}', Name), Mode=OneWay}"
                                                 Visibility="Collapsed"
                                                 Margin="0 14 0 0"
                                                 Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
@@ -175,13 +194,56 @@
                                         </Button>
 
                                         <!-- Distro Name -->
-                                        <TextBlock x:Name="DistroName"
-                                                   RelativePanel.RightOf="StopButton"
-                                                   Style="{StaticResource BodyTextBlockStyle}"
-                                                   Text="{x:Bind Name, Mode=TwoWay}"
-                                                   FontSize="18"
-                                                   VerticalAlignment="Center"
-                                                   Margin="5 14 0 0" />
+                                        <StackPanel RelativePanel.RightOf="StopButton">
+                                            <TextBlock x:Name="DistroName"
+                                                       Style="{StaticResource BodyTextBlockStyle}"
+                                                       Text="{x:Bind Name, Mode=TwoWay}"
+                                                       FontSize="12"
+                                                       FontWeight="Medium"
+                                                       VerticalAlignment="Center"
+                                                       Margin="5 14 0 0" />
+
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                           Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                           Text="{x:Bind OsName, Mode=TwoWay}"
+                                                           FontSize="8"
+                                                           VerticalAlignment="Center"
+                                                           Margin="6 0 2 0"/>
+                                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                           Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                           Text="{x:Bind OsVersion, Mode=TwoWay}"
+                                                           FontSize="8"
+                                                           VerticalAlignment="Center"/>
+                                                <StackPanel Orientation="Horizontal"
+                                                            Visibility="Collapsed"
+                                                            Tag="{x:Bind Path=system:String.Format('RUNNING_{0}', Name), Mode=OneWay}">
+                                                    <FontIcon Glyph="&#xEA81;"
+                                                              FontSize="12"
+                                                              VerticalAlignment="Center"
+                                                              Foreground="ForestGreen"
+                                                              Margin="12 0 4 4" />
+                                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                               Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                               Text="Running"
+                                                               FontSize="8"
+                                                               VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal"
+                                                            Tag="{x:Bind Path=system:String.Format('STOPPED_{0}', Name), Mode=OneWay}">
+                                                    <FontIcon Glyph="&#xEA81;"
+                                                              FontSize="12"
+                                                              VerticalAlignment="Center"
+                                                              Foreground="Gray"
+                                                              Margin="12 0 4 4" />
+                                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                               Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                               Text="Stopped"
+                                                               FontSize="8"
+                                                               VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
                                     </RelativePanel>
                                 </StackPanel>
                             </DataTemplate>
