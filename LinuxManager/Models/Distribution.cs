@@ -19,13 +19,22 @@ public class Distribution : INotifyPropertyChanged, IBaseModel
 
     public string OsVersion { get; set; }
 
-    public string Size { get; set; }
-
     public DiskUsageInfo DiskUsageInfo { get; set;}
 
-        public IList<string> Users { get; set; } = new List<string>();
+    public IList<string> Users { get; set; } = new List<string>();
 
     public ObservableCollection<Snapshot> Snapshots { get; set; } = new();
+
+    private string? _lastSnapshotDate;
+    public string LastSnapshotDate
+    {
+        get => Snapshots.MaxBy(s => s.CreationDate)?.CreationDate ?? "Never";
+        set
+        {
+            _lastSnapshotDate = value;
+            OnPropertyChanged();
+        }
+    }
 
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 

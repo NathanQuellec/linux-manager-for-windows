@@ -408,7 +408,7 @@
                                                            Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                            FontSize="12" />
                                                 <!-- Exemple statique : remplace par binding à la date de snapshot si disponible -->
-                                                <TextBlock Text="Never"
+                                                <TextBlock Text="{x:Bind LastSnapshotDate}"
                                                            FontSize="12"
                                                            Margin="0,8,0,0" />
                                             </StackPanel>

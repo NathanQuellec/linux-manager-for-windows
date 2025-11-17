@@ -207,25 +207,6 @@ public class DistributionInfosService : IDistributionInfosService
         }
     }
 
-    public string GetSize(string distroPath)
-    {
-        Log.Information("Getting distribution size from wsl vhdx image ...");
-
-        try
-        {
-            var diskLocation = Path.Combine(distroPath, "ext4.vhdx");
-            var diskFile = new FileInfo(diskLocation);
-            var sizeInGB = (decimal)diskFile.Length / 1024 / 1024 / 1024;
-
-            return Math.Round(sizeInGB, 2).ToString(CultureInfo.InvariantCulture);
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed to get distribution size from wsl vhdx image - Caused by exception : {ex} ");
-            return "0";
-        }
-    }
-
     public List<string> GetDistributionUsers(string distroName, string distroPath)
     {
         Log.Information("Getting distribution's users list ...");

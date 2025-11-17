@@ -65,7 +65,6 @@ public class DistributionService : IDistributionService
                         .WithWslVersion(wslVersion)
                         .WithOsName(_distroInfosService.GetOsInfos(distroName, distroPath, "NAME"))
                         .WithOsVersion(_distroInfosService.GetOsInfos(distroName, distroPath, "VERSION"))
-                        .WithSize(_distroInfosService.GetSize(distroPath))
                         .WithDiskUsageInfo(_distroInfosService.GetDistributionDiskUsageInfo(distroName))
                         .WithUsers(_distroInfosService.GetDistributionUsers(distroName, distroPath))
                         .WithSnapshots(_snapshotService.GetDistributionSnapshots(distroPath))
@@ -123,7 +122,7 @@ public class DistributionService : IDistributionService
             newDistro.WslVersion = distro.WslVersion;
             newDistro.OsName = _distroInfosService.GetOsInfos(newDistro.Name, newDistro.Path, "NAME");
             newDistro.OsVersion = _distroInfosService.GetOsInfos(newDistro.Name, newDistro.Path, "VERSION");
-            newDistro.Size = _distroInfosService.GetSize(newDistro.Path);
+            newDistro.DiskUsageInfo = _distroInfosService.GetDistributionDiskUsageInfo(newDistro.Name);
             newDistro.Users = _distroInfosService.GetDistributionUsers(newDistro.Name, newDistro.Path);
 
             this._distros.Add(newDistro);
@@ -367,5 +366,10 @@ public class DistributionService : IDistributionService
         {
             Log.Error($"Failed to start process for opening distro with WinTerm - Caused by exception : {ex}");
         }
+    }
+
+    public string GetLastSnapshotDate(Distribution distribution)
+    {
+        return distribution.Snapshots.Count == 0 ? "Never" : distribution.Snapshots.OrderByDescending(s => s.CreationDate).First().CreationDate;
     }
 }

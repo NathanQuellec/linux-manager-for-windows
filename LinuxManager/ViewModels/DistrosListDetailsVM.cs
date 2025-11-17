@@ -574,4 +574,10 @@ public class DistrosListDetailsVM : ObservableObject
             Log.Error($"Failed to create snapshot {snapshotName} of {distribution.Name} - Caused by exception : {ex}");
         }
     }
+
+    public string GetLastSnapshotDateViewModel(Distribution distribution)
+    {
+        Log.Information($"Getting last snapshot date of {distribution.Name} ...");
+       return  _distributionService.GetLastSnapshotDate(distribution);
+    }
 }
