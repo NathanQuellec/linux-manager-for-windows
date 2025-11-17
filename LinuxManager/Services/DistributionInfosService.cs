@@ -1,8 +1,9 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
-using Serilog;
 using LinuxManager.Contracts.Services;
 using LinuxManager.Helpers;
+using LinuxManager.Models;
+using Serilog;
 
 namespace LinuxManager.Services;
 
@@ -54,6 +55,94 @@ public class DistributionInfosService : IDistributionInfosService
         }
 
         return string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos;
+    }
+
+    public DiskUsageInfo GetDistributionDiskUsageInfo(string distroName)
+    {
+        Log.Information($"Fetching {distroName} disk usage information ...");
+
+        try
+        {
+            var process = new ProcessBuilder("powershell.exe")
+                .SetArguments($"/c wsl.exe --system -d {distroName} df -B1 /mnt/wslg/distro")
+                .SetCreateNoWindow(true)
+                .SetUseShellExecute(false)
+                .SetRedirectStandardOutput(true)
+                .SetRedirectStandardError(true)
+                .Build();
+            
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEnd();
+            var errorOutput = process.StandardError.ReadToEnd();
+
+
+            if (!string.IsNullOrEmpty(errorOutput))
+            {
+                Log.Error($"Error fetching disk usage for {distroName}: {errorOutput}");
+                return new DiskUsageInfo();
+            }
+
+            return ParseDiskUsageOutput(output);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to fetch distribution disk usage information - Caused by exception : {ex}");
+            return new DiskUsageInfo();
+        }
+    }
+
+    private static DiskUsageInfo ParseDiskUsageOutput(string output)
+    {
+        var diskUsageInfo = new DiskUsageInfo();
+
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            Log.Warning("Disk usage output is empty");
+            return diskUsageInfo;
+        }
+
+        try
+        {
+            var lines = output.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (lines.Length < 2)
+            {
+                Log.Warning("Disk usage output has unexpected format (less than 2 lines)");
+                return diskUsageInfo;
+            }
+
+            // Skip the header line and parse the data line
+            var dataLine = lines[1].Trim();
+            
+            // Split by whitespace while preserving the mount point which might contain spaces
+            var parts = dataLine.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length < 6)
+            {
+                Log.Warning($"Disk usage data line has unexpected format: {dataLine}");
+                return diskUsageInfo;
+            }
+
+            // Parse each field from the df output
+            diskUsageInfo.Size = UnitHelper.ParseBytesToGigaBytesStr(long.Parse(parts[1]));
+            diskUsageInfo.Used = UnitHelper.ParseBytesToGigaBytesStr(long.Parse(parts[2]));
+            diskUsageInfo.Available = UnitHelper.ParseBytesToGigaBytesStr(long.Parse(parts[3]));
+            diskUsageInfo.UsePercentage = UnitHelper.CalculateAndParsePercentage(diskUsageInfo.Used, diskUsageInfo.Size);
+
+            Log.Information($"Successfully parsed disk usage info: " +
+                $"Size={diskUsageInfo.Size}, " +
+                $"Used={diskUsageInfo.Used}, " +
+                $"Available={diskUsageInfo.Available}, " +
+                $"UsePercentage={diskUsageInfo.UsePercentage}, ");
+
+            return diskUsageInfo;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to parse disk usage output - Caused by exception: {ex}");
+            return diskUsageInfo;
+        }
     }
 
     private static string GetOsInfosFromVhdx(string distroPath, string osInfosFilePath, string osInfosPattern)

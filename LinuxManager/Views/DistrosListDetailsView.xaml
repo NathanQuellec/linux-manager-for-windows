@@ -365,22 +365,22 @@
                                                            FontWeight="SemiBold"
                                                            Foreground="{ThemeResource SystemColorGrayTextColor}" />
                                                 <!-- Taille: remplace la valeur statique par un binding si tu as une propriété Size (GB) -->
-                                                <TextBlock Text="{x:Bind Path=system:String.Format('{0} GB', Size)}"
+                                                <TextBlock Text="{x:Bind Path=system:String.Format('{0} GB', DiskUsageInfo.Used)}"
                                                            FontSize="24"
                                                            FontWeight="Bold"
                                                            Margin="0,8,0,4" />
-                                                <ProgressBar Value="24.4"
+                                                <ProgressBar Value="{x:Bind Path=DiskUsageInfo.UsePercentage}"
                                                              Maximum="100"
                                                              Height="8"
                                                              Margin="0,4,8,4"
                                                              Foreground="{ThemeResource SystemControlHighlightAccentBrush}" />
                                                 <StackPanel Orientation="Horizontal" 
                                                             VerticalAlignment="Center">
-                                                    <TextBlock Text="24.4% used"
+                                                    <TextBlock Text="{x:Bind Path=system:String.Format('{0}% used', DiskUsageInfo.UsePercentage)}"
                                                                FontSize="12"
                                                                Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                                Margin="0,8,4,0" />
-                                                    <TextBlock Text="of 25 GB"
+                                                    <TextBlock Text="{x:Bind Path=system:String.Format('of {0} GB', DiskUsageInfo.Size)}"
                                                                FontSize="12"
                                                                Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                                Margin="0,8,0,0" />

@@ -54,6 +54,12 @@ public class DistributionBuilder
         return this;
     }
 
+    public DistributionBuilder WithDiskUsageInfo(DiskUsageInfo diskUsageInfo)
+    {
+        _distribution.DiskUsageInfo = diskUsageInfo;
+        return this;
+    }
+
     public DistributionBuilder WithUsers(IList<string> users)
     {
         _distribution.Users = users;

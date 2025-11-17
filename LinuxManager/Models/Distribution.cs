@@ -21,7 +21,9 @@ public class Distribution : INotifyPropertyChanged, IBaseModel
 
     public string Size { get; set; }
 
-    public IList<string> Users { get; set; } = new List<string>();
+    public DiskUsageInfo DiskUsageInfo { get; set;}
+
+        public IList<string> Users { get; set; } = new List<string>();
 
     public ObservableCollection<Snapshot> Snapshots { get; set; } = new();
 

@@ -66,6 +66,7 @@ public class DistributionService : IDistributionService
                         .WithOsName(_distroInfosService.GetOsInfos(distroName, distroPath, "NAME"))
                         .WithOsVersion(_distroInfosService.GetOsInfos(distroName, distroPath, "VERSION"))
                         .WithSize(_distroInfosService.GetSize(distroPath))
+                        .WithDiskUsageInfo(_distroInfosService.GetDistributionDiskUsageInfo(distroName))
                         .WithUsers(_distroInfosService.GetDistributionUsers(distroName, distroPath))
                         .WithSnapshots(_snapshotService.GetDistributionSnapshots(distroPath))
                         .Build();
