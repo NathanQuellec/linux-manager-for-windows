@@ -121,7 +121,7 @@
                                     <StackPanel.Resources>
                                         <MenuFlyout x:Key="DistroMenuFlyout">
 
-                                            <MenuFlyoutItem Text="Open with File Explorer"
+                                            <MenuFlyoutItem Text="Browse Files"
                                                             Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithFileExplorerCommand}"
                                                             CommandParameter="{x:Bind}">
                                                 <MenuFlyoutItem.Icon>
@@ -129,7 +129,7 @@
                                                 </MenuFlyoutItem.Icon>
                                             </MenuFlyoutItem>
 
-                                            <MenuFlyoutItem Text="Open with VS Code"
+                                            <MenuFlyoutItem Text="VS Code"
                                                             Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithVsCodeCommand}"
                                                             CommandParameter="{x:Bind}">
                                                 <MenuFlyoutItem.Icon>
@@ -137,7 +137,7 @@
                                                 </MenuFlyoutItem.Icon>
                                             </MenuFlyoutItem>
 
-                                            <MenuFlyoutItem Text="Open with Windows Terminal"
+                                            <MenuFlyoutItem Text="Terminal"
                                                             Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithWinTermCommand}"
                                                             CommandParameter="{x:Bind}">
                                                 <MenuFlyoutItem.Icon>
@@ -145,7 +145,7 @@
                                                 </MenuFlyoutItem.Icon>
                                             </MenuFlyoutItem>
 
-                                            <MenuFlyoutItem Text="Remove"
+                                            <MenuFlyoutItem Text="Delete"
                                                             Command="{Binding ElementName=Page, Path=ViewModel.RemoveDistroCommand}"
                                                             CommandParameter="{x:Bind}">
                                                 <MenuFlyoutItem.Icon>
@@ -189,7 +189,7 @@
                                                 CommandParameter="{x:Bind}">
                                             <SymbolIcon Symbol="Stop"
                                                         Height="24"
-                                                        Width="24"/>
+                                                        Width="24" />
                                         </Button>
 
                                         <!-- Distro info replaced: use Grid to occupy remaining space to the right -->
@@ -294,240 +294,314 @@
                                 <Grid HorizontalAlignment="Center"
                                       VerticalAlignment="Center">
                                     <TextBlock Text="Select a distribution to view details"
-                                               FontSize="44"
+                                               FontSize="24"
                                                TextAlignment="Center"
                                                TextWrapping="Wrap"
-                                               Foreground="Gray" />
+                                               Foreground="{ThemeResource SystemColorGrayTextColor}" />
                                 </Grid>
                             </Grid>
                         </DataTemplate>
 
+                        <!-- Distribution detail template : layout en cartes -->
                         <DataTemplate x:Key="DistributionTemplate"
                                       x:DataType="model:Distribution">
-                            <ScrollViewer>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
+                            <ScrollViewer  HorizontalScrollBarVisibility="Disabled"
+                                           VerticalScrollBarVisibility="Auto">
+                                <StackPanel Spacing="20"
+                                            Padding="16"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch">
 
-                                    <!-- Left Panel -->
-                                    <Grid Grid.Column="0"
-                                          Background="{ThemeResource LayerFillColorAltBrush}"
-                                          CornerRadius="5"
-                                          Margin="50 50 0 50">
+                                    <!-- Header : Icon, Name, subtitle and actions -->
+                                    <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0"
-                                                   Style="{StaticResource TitleTextBlockStyle}"
-                                                   Text="System :"
-                                                   FontSize="{StaticResource LargeFontSize}"
-                                                   FontWeight="Bold"
-                                                   TextWrapping="Wrap"
-                                                   Margin="40 24 0 8" />
+                                        <!-- Icon -->
+                                        <Border Width="48"
+                                                Height="48"
+                                                CornerRadius="8"
+                                                Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                                                BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                                BorderThickness="1"
+                                                VerticalAlignment="Center">
+                                            <!-- Si tu as un logo, remplace le FontIcon par Image -->
+                                            <FontIcon Glyph="&#xE7FD;"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center" />
+                                        </Border>
 
-                                        <RelativePanel Grid.Row="1"
-                                                       Grid.Column="0"
-                                                       Width="Auto"
-                                                       Margin="40 24">
-                                            <TextBlock x:Name="OsName"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="Name : "
-                                                       FontSize="18"
-                                                       FontWeight="SemiBold"
-                                                       TextWrapping="Wrap" />
-                                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                                       RelativePanel.RightOf="OsName"
-                                                       Text="{x:Bind OsName}"
-                                                       FontSize="18"
-                                                       Margin="12 0 0 0"
-                                                       TextWrapping="Wrap" />
-                                        </RelativePanel>
-
-                                        <RelativePanel Grid.Row="2"
-                                                       Grid.Column="0"
-                                                       Margin="40 24">
-                                            <TextBlock x:Name="OsVersion"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="Version : "
-                                                       FontSize="18"
+                                        <StackPanel Grid.Column="1"
+                                                    Margin="12,0,0,0"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Name}"
+                                                       FontSize="20"
                                                        FontWeight="SemiBold" />
-                                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                                       RelativePanel.RightOf="OsVersion"
-                                                       Text="{x:Bind OsVersion}"
-                                                       FontSize="18"
-                                                       Margin="12 0 0 0" />
-                                        </RelativePanel>
-
-                                        <RelativePanel Grid.Row="3"
-                                                       Grid.Column="0"
-                                                       Margin="40 24">
-                                            <TextBlock x:Name="DistroSize"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="Disk Usage : "
-                                                       FontSize="18"
-                                                       FontWeight="SemiBold" />
-                                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                                       RelativePanel.RightOf="DistroSize"
-                                                       Text="{x:Bind Path=system:String.Format('{0} GB', Size)}"
-                                                       FontSize="18"
-                                                       Margin="12 0 0 0" />
-                                        </RelativePanel>
-
-                                        <RelativePanel Grid.Row="4"
-                                                       Grid.Column="0"
-                                                       Margin="40 24">
-                                            <TextBlock x:Name="WslVersion"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="WSL Version : "
-                                                       FontSize="18"
-                                                       FontWeight="SemiBold" />
-                                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                                       RelativePanel.RightOf="WslVersion"
-                                                       Text="{x:Bind WslVersion}"
-                                                       FontSize="18"
-                                                       Margin="12 0 0 0" />
-                                        </RelativePanel>
-
-                                        <RelativePanel Grid.Row="5"
-                                                       Grid.Column="0"
-                                                       Margin="40 16">
-                                            <TextBlock x:Name="UsersList"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="Users : "
-                                                       FontSize="18"
-                                                       FontWeight="SemiBold"
-                                                       Margin="0 12 0 0" />
-                                            <Expander RelativePanel.RightOf="UsersList"
-                                                      IsExpanded="False"
-                                                      ExpandDirection="Down"
-                                                      Header="Users"
-                                                      Width="124"
-                                                      Margin="60 0 0 0">
-                                                <Expander.Content>
-                                                    <ListView ItemsSource="{x:Bind Users}" />
-                                                </Expander.Content>
-                                            </Expander>
-                                        </RelativePanel>
+                                            <TextBlock Text="{x:Bind OsName}"
+                                                       FontSize="12"
+                                                       Foreground="{ThemeResource SystemColorGrayTextColor}" />
+                                        </StackPanel>
                                     </Grid>
 
-                                    <!-- Right Panel -->
-                                    <Grid Grid.Column="1"
-                                          Background="{ThemeResource LayerFillColorAltBrush}"
-                                          CornerRadius="5"
-                                          Margin="50">
+                                    <!-- Top cards row : Storage & Snapshots -->
+                                    <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0"
-                                                   Style="{StaticResource TitleTextBlockStyle}"
-                                                   Text="Snapshots :"
-                                                   FontSize="{StaticResource LargeFontSize}"
-                                                   FontWeight="Bold"
-                                                   TextWrapping="Wrap"
-                                                   Margin="40 24 0 8" />
+                                        <!-- Storage card -->
+                                        <Border Grid.Column="0"
+                                                CornerRadius="8"
+                                                Padding="16"
+                                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                                BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                                BorderThickness="1">
+                                            <StackPanel>
+                                                <TextBlock Text="Storage"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource SystemColorGrayTextColor}" />
+                                                <!-- Taille: remplace la valeur statique par un binding si tu as une propriété Size (GB) -->
+                                                <TextBlock Text="{x:Bind Path=system:String.Format('{0} GB', Size)}"
+                                                           FontSize="24"
+                                                           FontWeight="Bold"
+                                                           Margin="0,8,0,4" />
+                                                <ProgressBar Value="24.4"
+                                                             Maximum="100"
+                                                             Height="8"
+                                                             Margin="0,4,8,4"
+                                                             Foreground="{ThemeResource SystemControlHighlightAccentBrush}" />
+                                                <StackPanel Orientation="Horizontal" 
+                                                            VerticalAlignment="Center">
+                                                    <TextBlock Text="24.4% used"
+                                                               FontSize="12"
+                                                               Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                               Margin="0,8,4,0" />
+                                                    <TextBlock Text="of 25 GB"
+                                                               FontSize="12"
+                                                               Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                               Margin="0,8,0,0" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
 
-                                        <RelativePanel Grid.Row="1"
-                                                       Grid.Column="0"
-                                                       Margin="40 16">
-                                            <TextBlock x:Name="SnapshotsList"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="List : "
-                                                       FontSize="18"
+                                        <!-- Snapshots card -->
+                                        <Border Grid.Column="1"
+                                                CornerRadius="8"
+                                                Padding="16"
+                                                Background="{ThemeResource LayerFillColorAltBrush}"
+                                                BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                                BorderThickness="1">
+                                            <StackPanel>
+                                                <TextBlock Text="Snapshots"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{ThemeResource SystemColorGrayTextColor}" />
+                                                <!-- Utilise binding vers Snapshots.Count -->
+                                                <TextBlock Text="{x:Bind Snapshots.Count, Mode=OneWay}"
+                                                           FontSize="24"
+                                                           FontWeight="Bold"
+                                                           Margin="0,8,0,4" />
+                                                <TextBlock Text="Last snapshot"
+                                                           Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                           FontSize="12" />
+                                                <!-- Exemple statique : remplace par binding à la date de snapshot si disponible -->
+                                                <TextBlock Text="Never"
+                                                           FontSize="12"
+                                                           Margin="0,8,0,0" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- System information card -->
+                                    <Border CornerRadius="8"
+                                            Padding="16"
+                                            Background="{ThemeResource LayerFillColorAltBrush}"
+                                            BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                            BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="System Information"
                                                        FontWeight="SemiBold"
-                                                       Margin="0 12 0 0" />
-                                            <Button x:Name="DisplaySnapshots"
-                                                    RelativePanel.RightOf="SnapshotsList"
-                                                    Content="Display"
-                                                    Command="{Binding ElementName=Page, Path=ViewModel.DisplaySnapshotsListCommand}"
-                                                    CommandParameter="{x:Bind}"
-                                                    Margin="24 8 0 0" />
-                                            <Button RelativePanel.RightOf="DisplaySnapshots"
-                                                    Height="32"
-                                                    Margin="4 8 0 0"
-                                                    Command="{Binding ElementName=Page, Path=ViewModel.CreateSnapshotCommand}"
+                                                       Margin="0,0,0,12" />
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Installation location -->
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Installation Location"
+                                                               FontSize="12"
+                                                               Foreground="{ThemeResource SystemColorGrayTextColor}" />
+                                                    <!-- Valeur d'exemple : remplace par binding si tu as le path -->
+                                                    <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                                                            Padding="8"
+                                                            Margin="0,8,0,0"
+                                                            CornerRadius="6"
+                                                            BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                                            BorderThickness="1">
+                                                        <TextBlock Text="PATH"
+                                                                   TextWrapping="Wrap"
+                                                                   FontSize="12" />
+                                                    </Border>
+                                                </StackPanel>
+
+                                                <!-- Last activity -->
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Last Activity"
+                                                               FontSize="12"
+                                                               Foreground="{ThemeResource SystemColorGrayTextColor}" />
+                                                    <!-- Exemple statique -->
+                                                    <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                                                            Padding="8"
+                                                            Margin="0,8,0,0"
+                                                            CornerRadius="6"
+                                                            BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                                            BorderThickness="1">
+                                                        <TextBlock Text="1 week ago"
+                                                                   FontSize="12" />
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Quick actions -->
+                                    <Border CornerRadius="8"
+                                            Padding="12"
+                                            Background="{ThemeResource LayerFillColorAltBrush}"
+                                            BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                            BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Orientation="Horizontal"
+                                                        Spacing="24"
+                                                        VerticalAlignment="Center">
+                                                <Button Style="{StaticResource MinimalistButtonStyle}"
+                                                        Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithWinTermCommand}"
+                                                        CommandParameter="{x:Bind}">
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Spacing="8">
+                                                        <FontIcon Glyph="&#xE756;" />
+                                                        <TextBlock Text="Terminal"
+                                                                   VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Style="{StaticResource MinimalistButtonStyle}"
+                                                        Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithVsCodeCommand}"
+                                                        CommandParameter="{x:Bind}">
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Spacing="8">
+                                                        <FontIcon Glyph="&#xE943;" />
+                                                        <TextBlock Text="VS Code"
+                                                                   VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Style="{StaticResource MinimalistButtonStyle}"
+                                                        Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithFileExplorerCommand}"
+                                                        CommandParameter="{x:Bind}">
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Spacing="8">
+                                                        <FontIcon Glyph="&#xEC50;" />
+                                                        <TextBlock Text="Browse Files"
+                                                                   VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Style="{StaticResource MinimalistButtonStyle}">
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Spacing="8">
+                                                        <FontIcon Glyph="&#xE8EE;" />
+                                                        <TextBlock Text="Export"
+                                                                   VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Style="{StaticResource MinimalistButtonStyle}">
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Spacing="8">
+                                                        <FontIcon Glyph="&#xE8C8;" />
+                                                        <TextBlock Text="Clone"
+                                                                   VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+
+                                            <!-- Delete button aligné à droite -->
+                                            <Button Grid.Column="1"
+                                                    Width="100"
+                                                    Height="36"
+                                                    Background="#C85A5A"
+                                                    Foreground="White"
+                                                    CornerRadius="6"
+                                                    Command="{Binding ElementName=Page, Path=ViewModel.RemoveDistroCommand}"
                                                     CommandParameter="{x:Bind}">
-                                                <FontIcon Glyph="&#xE710;"
-                                                          FontSize="16" />
+                                                <StackPanel Orientation="Horizontal"
+                                                            Spacing="8"
+                                                            HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE74D;" />
+                                                    <TextBlock Text="Delete" />
+                                                </StackPanel>
                                             </Button>
-                                        </RelativePanel>
+                                        </Grid>
+                                    </Border>
 
-                                        <RelativePanel Grid.Row="2"
-                                                       Grid.Column="0"
-                                                       Margin="40 16">
-                                            <TextBlock x:Name="SnapshotsTotalSize"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="Total Size : "
-                                                       FontSize="18"
-                                                       FontWeight="SemiBold"
-                                                       Margin="0 12 0 0" />
-                                            <TextBlock x:Name="SnapshotsTotalSizeValue"
-                                                       RelativePanel.RightOf="SnapshotsTotalSize"
-                                                       Text="{x:Bind system:String.Format('{0} GB', SnapshotsTotalSize), Mode=OneWay}"
-                                                       FontSize="18"
-                                                       Margin="12 12 0 0" />
-                                        </RelativePanel>
+                                    <!-- Snapshot management area -->
+                                    <Border CornerRadius="8"
+                                            Padding="20"
+                                            Background="{ThemeResource LayerFillColorAltBrush}"
+                                            BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                            BorderThickness="1"
+                                            Height="220">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
 
-                                        <RelativePanel Grid.Row="3"
-                                                       Grid.Column="0"
-                                                       Margin="40 16">
-                                            <TextBlock x:Name="SnapshotsCount"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="Count : "
-                                                       FontSize="18"
-                                                       FontWeight="SemiBold"
-                                                       Margin="0 12 0 0" />
-                                            <TextBlock x:Name="SnapshotsCountValue"
-                                                       RelativePanel.RightOf="SnapshotsCount"
-                                                       Style="{StaticResource BodyTextBlockStyle}"
-                                                       Text="{x:Bind Snapshots.Count, Mode=OneWay}"
-                                                       FontSize="18"
-                                                       Margin="12 12 0 0" />
-                                        </RelativePanel>
+                                            <StackPanel>
+                                                <TextBlock Text="Snapshot Management"
+                                                           FontWeight="SemiBold"
+                                                           Margin="0,0,0,8" />
+                                                <StackPanel HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Margin="0,24,0,0">
+                                                    <FontIcon Glyph="&#xE8B3;"
+                                                              FontSize="28"
+                                                              Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                              HorizontalAlignment="Center" />
+                                                    <TextBlock Text="No Snapshots Yet"
+                                                               FontWeight="SemiBold"
+                                                               Margin="0,12,0,0"
+                                                               HorizontalAlignment="Center" />
+                                                    <TextBlock Text="Create your first snapshot to save the current state of this distribution"
+                                                               FontSize="12"
+                                                               Foreground="{ThemeResource SystemColorGrayTextColor}"
+                                                               TextAlignment="Center"
+                                                               Margin="0,8,0,0" />
+                                                </StackPanel>
+                                            </StackPanel>
 
-                                        <RelativePanel Grid.Row="4"
-                                                       Grid.Column="0"
-                                                       Margin="40 16">
-                                            <TextBlock x:Name="SnapshotLastDate"
-                                                       Style="{StaticResource BodyStrongTextBlockStyle}"
-                                                       Text="Last Date : "
-                                                       FontSize="18"
-                                                       FontWeight="SemiBold"
-                                                       Margin="0 12 0 0" />
-                                            <TextBlock x:Name="SnapshotLastDateValue"
-                                                       RelativePanel.RightOf="SnapshotLastDate"
-                                                       Style="{StaticResource BodyTextBlockStyle}"
-                                                       Text="{Binding Snapshots[0].CreationDate, FallbackValue='None'}"
-                                                       FontSize="18"
-                                                       Margin="12 12 0 0" />
-                                        </RelativePanel>
-                                    </Grid>
-                                </Grid>
+                                            <Button Grid.Column="1"
+                                                    Content="+ Create Snapshot"
+                                                    Width="140"
+                                                    Height="36"
+                                                    VerticalAlignment="Top"
+                                                    Background="{ThemeResource SystemControlHighlightAccentBrush}"
+                                                    Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                                    CornerRadius="6"
+                                                    Command="{Binding ElementName=Page, Path=ViewModel.CreateSnapshotCommand}"
+                                                    CommandParameter="{x:Bind}" />
+                                        </Grid>
+                                    </Border>
+
+                                </StackPanel>
                             </ScrollViewer>
-
                         </DataTemplate>
 
                     </ContentControl.Resources>
