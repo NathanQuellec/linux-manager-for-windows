@@ -30,7 +30,7 @@
         <StackPanel x:Name="AppTitleBar"
                     Orientation="Horizontal"
                     Grid.Row="0"
-                    BorderBrush="#3F3F3F"
+                    BorderBrush="{ThemeResource SubtleBorderBrush}"
                     BorderThickness="0 1 0 1">
             <Image Source="/Assets/LinuxManagerIcon.ico"
                    HorizontalAlignment="Left"
@@ -41,7 +41,7 @@
             <TextBlock x:Name="AppTitleTextBlock"
                        Text="Linux Manager"
                        TextWrapping="NoWrap"
-                       FontWeight="Bold"
+                       FontWeight="SemiBold"
                        Style="{StaticResource CaptionTextBlockStyle}"
                        VerticalAlignment="Center"
                        Margin="4,4,0,4" />
@@ -54,7 +54,7 @@
                    Margin="0 0 0 0"
                    PaneBackground="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
                    BorderThickness="0 0 1 0"
-                   BorderBrush="#3F3F3F">
+                   BorderBrush="{ThemeResource SubtleBorderBrush}">
 
             <!-- Master List (Pane) -->
             <SplitView.Pane>
@@ -69,7 +69,7 @@
                     <StackPanel Grid.Row="0"
                                 Spacing="16"
                                 BorderThickness="0 0 0 1"
-                                BorderBrush="#3F3F3F">
+                                BorderBrush="{ThemeResource SubtleBorderBrush}">
                         <StackPanel Margin="20 0 0 0">
                             <TextBlock Text="WSL Distributions"
                                        FontSize="14"
@@ -84,8 +84,8 @@
                         <Button Content="+  Install Distribution"
                                 HorizontalAlignment="Stretch"
                                 Height="28"
-                                Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                Foreground="Black"
+                                Background="{ThemeResource SystemAccentColorLight1}"
+                                Foreground="{ThemeResource SystemChromeMediumLowColor}"
                                 CornerRadius="4"
                                 FontWeight="SemiBold"
                                 FontSize="12"
