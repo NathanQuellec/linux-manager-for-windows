@@ -26,55 +26,15 @@ public class DistrosListDetailsVM : ObservableObject
 
     #region RelayCommand
 
-    public AsyncRelayCommand<Distribution> RemoveDistroCommand
-    {
-        get; set;
-    }
-
-    public AsyncRelayCommand<Distribution> RenameDistroCommand
-    {
-        get; set;
-    }
-
-    public RelayCommand<Distribution> LaunchDistroCommand
-    {
-        get; set;
-    }
-
-    public RelayCommand<Distribution> StopDistroCommand
-    {
-        get; set;
-    }
-
-    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand
-    {
-        get; set;
-    }
-
-    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand
-    {
-        get; set;
-    }
-
-    public RelayCommand<Distribution> OpenDistroWithWinTermCommand
-    {
-        get; set;
-    }
-
-    public AsyncRelayCommand CreateDistroCommand
-    {
-        get; set;
-    }
-
-    public AsyncRelayCommand<Distribution> CreateSnapshotCommand
-    {
-        get; set;
-    }
-
-    public AsyncRelayCommand<Distribution> DisplaySnapshotsListCommand
-    {
-        get; set;
-    }
+    public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
+    public AsyncRelayCommand<Distribution> RenameDistroCommand { get; set; }
+    public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
+    public RelayCommand<Distribution> StopDistroCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithWinTermCommand { get; set; }
+    public AsyncRelayCommand CreateDistroCommand { get; set; }
+    public AsyncRelayCommand<Distribution> CreateSnapshotCommand { get; set; }
 
     #endregion
 
@@ -95,7 +55,6 @@ public class DistrosListDetailsVM : ObservableObject
         OpenDistroWithWinTermCommand = new RelayCommand<Distribution>(OpenDistroWithWinTermViewModel);
         CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog);
         CreateSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateSnapshotDialog);
-        DisplaySnapshotsListCommand = new AsyncRelayCommand<Distribution>(DisplaySnapshotsList);
 
         _distributionService.InitDistributionsList();
         PopulateDistributionsCollection();
@@ -103,7 +62,7 @@ public class DistrosListDetailsVM : ObservableObject
 
     private void PopulateDistributionsCollection()
     {
-        Log.Information($"Populate list of distributions");
+        Log.Information("Populate list of distributions");
         try
         {
             Distros.Clear();
@@ -243,10 +202,7 @@ public class DistrosListDetailsVM : ObservableObject
         try
         {
             var isDistroRenamed = await _distributionService.RenameDistribution(distribution, newDistroName);
-            if (!isDistroRenamed)
-            {
-                return;
-            }
+            if (!isDistroRenamed) return;
 
             var index = Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
             if (index != -1)
@@ -264,49 +220,35 @@ public class DistrosListDetailsVM : ObservableObject
     private void LaunchDistributionViewModel(Distribution distribution)
     {
         Log.Information($"[COMMAND CALL] {distribution!.Name} distribution is launching ...");
-
         _distributionService.LaunchDistribution(distribution);
-
-        // Publish message  (allows us to show the stop button when the start button is clicked)
         WeakReferenceMessenger.Default.Send(new ShowDistroStopButtonMessage(distribution));
     }
 
     private void StopDistributionViewModel(Distribution distribution)
     {
         Log.Information($"[COMMAND CALL] {distribution!.Name} distribution is stopping ...");
-
         _distributionService.StopDistribution(distribution);
-
         WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
     }
 
     private void OpenDistributionWithFileExplorerViewModel(Distribution distribution)
     {
         Log.Information($"[COMMAND CALL] {distribution!.Name} file system is opening ...");
-
         _distributionService.OpenDistributionFileSystem(distribution);
     }
 
     private void OpenDistributionWithVsCodeViewModel(Distribution distribution)
     {
         Log.Information($"[COMMAND CALL] Opening {distribution.Name} with VS Code ...");
-
         _distributionService.OpenDistributionWithVsCode(distribution);
-
     }
 
     private void OpenDistroWithWinTermViewModel(Distribution distribution)
     {
         Log.Information($"[COMMAND CALL] Opening {distribution.Name} with Windows Terminal ...");
-
         _distributionService.OpenDistroWithWinTerm(distribution);
-
-        //WeakReferenceMessenger.Default.Send(new ShowDistroStopButtonMessage(distribution));
     }
 
-    // return a tuple composed of the distro name, the resource origin (file/folder path or docker hub link)
-    // and the creation mode chose by the user
-    // TODO : Refactor
     private static Tuple<string, string, string>? GetDistroCreationFormInfos(ContentDialog dialog)
     {
         Log.Information("Fetching distribution creation form's information ...");
@@ -340,7 +282,6 @@ public class DistrosListDetailsVM : ObservableObject
                     resourceOrigin = resourceOriginTextBox.Text;
                     break;
             }
-
             return Tuple.Create(distroName, creationMode, resourceOrigin);
         }
         catch (Exception ex)
@@ -348,20 +289,14 @@ public class DistrosListDetailsVM : ObservableObject
             Log.Error($"Failed to fetch distribution creation form's information - Caused by exception : {ex}");
             return null;
         }
-
     }
 
     private async Task CreateDistributionDialog()
     {
         Log.Information("[COMMAND CALL] Opening ContentDialog for distribution creation");
-
         try
         {
-            var createDistroDialog = new CreateDistributionView
-            {
-                XamlRoot = App.MainWindow.Content.XamlRoot,
-            };
-
+            var createDistroDialog = new CreateDistributionView { XamlRoot = App.MainWindow.Content.XamlRoot };
             createDistroDialog.PrimaryButtonClick += ValidateCreateDistribution;
 
             if (App.IsDistributionProcessing)
@@ -371,11 +306,9 @@ public class DistrosListDetailsVM : ObservableObject
             }
 
             var buttonClicked = await createDistroDialog.ShowAsync();
-
             if (buttonClicked == ContentDialogResult.Primary)
             {
                 var (distroName, creationMode, resourceOrigin) = GetDistroCreationFormInfos(createDistroDialog);
-
                 await CreateDistributionViewModel(distroName, creationMode, resourceOrigin);
             }
         }
@@ -402,14 +335,12 @@ public class DistrosListDetailsVM : ObservableObject
     private static void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         Log.Information("Validating distribution creation mode ...");
-
         try
         {
             var creationMode = sender.FindChild("DistroCreationMode") as ComboBox;
             creationMode!.ClearValue(Control.BorderBrushProperty);
             var creationModeErrorInfoBar = sender.FindChild("CreationModeErrorInfoBar") as InfoBar;
             creationModeErrorInfoBar!.IsOpen = false;
-
             if (creationMode.SelectedItem == null)
             {
                 args.Cancel = true;
@@ -421,19 +352,15 @@ public class DistrosListDetailsVM : ObservableObject
         {
             Log.Error($"Failed to validate distribution creation mode - Caused by exception : {ex}");
         }
-
     }
 
     internal async Task CreateDistributionViewModel(string distroName, string creationMode, string resourceOrigin)
     {
         Log.Information("Creating new distribution ...");
-
         App.IsDistributionProcessing = true;
         var createDistroInfoProgress = _infoBarService.FindInfoBar("CreateDistroInfoProgress");
-        // setting initial progress bar message
         WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Linux Manager creates your distribution ..."));
         _infoBarService.OpenInfoBar(createDistroInfoProgress);
-
         try
         {
             var newDistro = await _distributionService.CreateDistribution(distroName, creationMode, resourceOrigin);
@@ -443,11 +370,9 @@ public class DistrosListDetailsVM : ObservableObject
             Distros.Add(newDistro);
             App.IsDistributionProcessing = false;
         }
-
         catch (Exception ex)
         {
             Log.Error($"Failed to create new distribution {distroName} - Caused by exception : {ex} ");
-
             _infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoError = _infoBarService.FindInfoBar("CreateDistroInfoError");
             _infoBarService.OpenInfoBar(createDistroInfoError, ex.Message, 5000);
@@ -455,83 +380,43 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    private async Task DisplaySnapshotsList(Distribution distribution)
-    {
-        Log.Information($"[COMMAND CALL] Opening ContentDialog to display snapshots of {distribution.Name}");
-
-        try
-        {
-            var displaySnapshots = new DisplaySnapshotsView()
-            {
-                XamlRoot = App.MainWindow.Content.XamlRoot,
-                DataContext = distribution,
-            };
-
-            await displaySnapshots.ShowAsync();
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed to display snapshots of {distribution.Name} - Caused by exception : {ex}");
-        }
-    }
-
     private async Task CreateSnapshotDialog(Distribution distribution)
     {
         Log.Information($"[COMMAND CALL] : Opening ContentDialog for snapshot creation of {distribution.Name}");
-
         try
         {
-            var createSnapshotDialog = new CreateSnapshotView
-            {
-                XamlRoot = App.MainWindow.Content.XamlRoot
-            };
-
+            var createSnapshotDialog = new CreateSnapshotView { XamlRoot = App.MainWindow.Content.XamlRoot };
             createSnapshotDialog.PrimaryButtonClick += ValidateSnapshotName;
-
             var buttonClicked = await createSnapshotDialog.ShowAsync();
-
             if (buttonClicked == ContentDialogResult.Primary)
             {
                 WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
                 var snapshotName = (createSnapshotDialog.FindChild("SnapshotNameInput") as TextBox)!.Text;
                 var snapshotDescr = (createSnapshotDialog.FindChild("SnapshotDescrInput") as TextBox)!.Text
-                    .Replace(';', ' ')
-                    .Replace('\n', ' ')
-                    .Replace('\r', ' ');
-                ; // replace some special characters to avoid error in SnapshotService::GetDistributionSnapshots
+                    .Replace(';', ' ').Replace('\n', ' ').Replace('\r', ' ');
                 var isFastSnapshot = (createSnapshotDialog.FindChild("IsFastSnapshot") as ToggleSwitch)!.IsOn;
                 await CreateSnapshotViewModel(distribution, snapshotName, snapshotDescr, isFastSnapshot);
             }
         }
-
         catch (Exception ex)
         {
             Log.Error($"Failed to open snapshot creation dialog - Caused by exception : {ex}");
         }
     }
 
-    // TODO : Refactor with ValidateDistroName
     private static void ValidateSnapshotName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         Log.Information("Validating snapshot name ...");
-
         var snapshotNameInput = sender.FindChild("SnapshotNameInput") as TextBox;
         snapshotNameInput!.ClearValue(Control.BorderBrushProperty);
-
         var errorInfoBar = sender.FindChild("SnapshotNameErrorInfoBar") as InfoBar;
         errorInfoBar!.IsOpen = false;
-
         var regex = new Regex("^[a-zA-Z0-9-_ ]*$");
         const int minLength = 2;
-
         try
         {
             var textInputValidationHelper = new TextInputValidation(snapshotNameInput.Text);
-            textInputValidationHelper
-                .NotNullOrWhiteSpace()
-                .IncludeWhiteSpaceChar()
-                .MinimumLength(minLength)
-                .InvalidCharacters(regex, "special characters");
+            textInputValidationHelper.NotNullOrWhiteSpace().IncludeWhiteSpaceChar().MinimumLength(minLength).InvalidCharacters(regex, "special characters");
         }
         catch (ArgumentException e)
         {
@@ -543,9 +428,7 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    //TODO : Refactor with CreateDistributionViewModel to avoid boilerplate code
-    private async Task CreateSnapshotViewModel(Distribution distribution, string snapshotName,
-        string snapshotDescr, bool isFastSnapshot)
+    private async Task CreateSnapshotViewModel(Distribution distribution, string snapshotName, string snapshotDescr, bool isFastSnapshot)
     {
         Log.Information($"Creating snapshot {snapshotName} of {distribution.Name} ...");
         WeakReferenceMessenger.Default.Send(new SnapshotProgressBarMessage("Linux Manager creates your snapshot ..."));
@@ -553,9 +436,7 @@ public class DistrosListDetailsVM : ObservableObject
         {
             var createSnapshotInfoProgress = _infoBarService.FindInfoBar("CreateSnapshotInfoProgress");
             _infoBarService.OpenInfoBar(createSnapshotInfoProgress);
-            var isSnapshotCreated =
-                await _snapshotService.CreateSnapshot(distribution, snapshotName, snapshotDescr, isFastSnapshot);
-
+            var isSnapshotCreated = await _snapshotService.CreateSnapshot(distribution, snapshotName, snapshotDescr, isFastSnapshot);
             if (isSnapshotCreated)
             {
                 _infoBarService.CloseInfoBar(createSnapshotInfoProgress);
@@ -578,6 +459,6 @@ public class DistrosListDetailsVM : ObservableObject
     public string GetLastSnapshotDateViewModel(Distribution distribution)
     {
         Log.Information($"Getting last snapshot date of {distribution.Name} ...");
-       return  _distributionService.GetLastSnapshotDate(distribution);
+        return _distributionService.GetLastSnapshotDate(distribution);
     }
 }

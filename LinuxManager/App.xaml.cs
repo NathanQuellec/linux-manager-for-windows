@@ -14,13 +14,13 @@ using LinuxManager.ViewModels;
 using LinuxManager.Views;
 
 using Microsoft.UI.Xaml.Controls;
-using LinuxManager.Views.Dialogs;
 using Serilog;
 using Serilog.Events;
 using LinuxManager.Contracts.Services.Storage;
 using LinuxManager.Contracts.Services.UserInterface;
 using LinuxManager.Services.Storage;
 using LinuxManager.Services.UserInterface;
+using LinuxManager.Views.UserControls;
 
 namespace LinuxManager;
 

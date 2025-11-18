@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
-
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -10,16 +9,8 @@ using Serilog;
 using LinuxManager.Helpers;
 using LinuxManager.Messages;
 using LinuxManager.ViewModels;
-using System.Collections.Specialized;
-using LinuxManager.Models;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace LinuxManager.Views;
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class DistrosListDetailsView : Page
 {
     private Button _distroStopButton = new();
@@ -28,14 +19,7 @@ public sealed partial class DistrosListDetailsView : Page
     private StackPanel _distroRunningStatusPanel = new();
     private StackPanel _distroStoppedStatusPanel = new();
 
-    // Track current distribution and snapshot collection handler
-    private Distribution? _currentDistributionForSnapshots;
-    private NotifyCollectionChangedEventHandler? _snapshotsChangedHandler;
-
-    public DistrosListDetailsVM ViewModel
-    {
-        get;
-    }
+    public DistrosListDetailsVM ViewModel { get; }
 
     public DistrosListDetailsView()
     {
@@ -45,18 +29,13 @@ public sealed partial class DistrosListDetailsView : Page
         App.MainWindow.SetTitleBar(AppTitleBar);
         TitleBarHelper.UpdateTitleBar(ElementTheme.Default);
 
-        // Subscribe to selection changed so we can control the snapshot area visibility
-        MasterListView.SelectionChanged += MasterListView_SelectionChanged;
-
         WeakReferenceMessenger.Default.Register<ShowDistroStopButtonMessage>(this, (recipient, message) =>
         {
             Log.Information("[PUB/SUB] Message received to show distribution 'stop' button");
             var distro = message.Distribution;
-            FindDistroButton(this, distro.Name);
+            ResolveDistroControls(distro.Name);
             _distroStartButton.Visibility = Visibility.Collapsed;
             _distroStopButton.Visibility = Visibility.Visible;
-
-            FindDistroStatusPanel(this, distro.Name);
             _distroRunningStatusPanel.Visibility = Visibility.Visible;
             _distroStoppedStatusPanel.Visibility = Visibility.Collapsed;
         });
@@ -65,16 +44,13 @@ public sealed partial class DistrosListDetailsView : Page
         {
             Log.Information("[PUB/SUB] Message received to hide distribution 'stop' button");
             var distro = message.Distribution;
-            FindDistroButton(this, distro.Name);
+            ResolveDistroControls(distro.Name);
             _distroStopButton.Visibility = Visibility.Collapsed;
             _distroStartButton.Visibility = Visibility.Visible;
-
-            FindDistroStatusPanel(this, distro.Name);
             _distroRunningStatusPanel.Visibility = Visibility.Collapsed;
             _distroStoppedStatusPanel.Visibility = Visibility.Visible;
         });
 
-        //Close InfoBar after timer set in DistroListDetailsViewModel.cs
         WeakReferenceMessenger.Default.Register<CloseInfoBarMessage>(this, (recipient, message) =>
         {
             Log.Information("[PUB/SUB] Message received to close infobar");
@@ -83,116 +59,47 @@ public sealed partial class DistrosListDetailsView : Page
         });
     }
 
-    private void MasterListView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private void ResolveDistroControls(string distroName)
     {
-        var distribution = MasterListView.SelectedItem as Distribution;
-        UpdateSnapshotsForDistribution(distribution);
+        var resolvers = new Dictionary<string, Action<FrameworkElement>>
+        {
+            [$"STOP_{distroName}"] = fe => _distroStopButton = (Button)fe,
+            [$"START_{distroName}"] = fe => _distroStartButton = (Button)fe,
+            [$"RUNNING_{distroName}"] = fe => _distroRunningStatusPanel = (StackPanel)fe,
+            [$"STOPPED_{distroName}"] = fe => _distroStoppedStatusPanel = (StackPanel)fe
+        };
+
+        TraverseVisualTree(this, resolvers);
     }
 
-    private void UpdateSnapshotsForDistribution(Distribution? distribution)
+    private static void TraverseVisualTree(DependencyObject root, IDictionary<string, Action<FrameworkElement>> resolvers)
     {
-        // Unsubscribe previous handler
-        if (_currentDistributionForSnapshots != null && _snapshotsChangedHandler != null)
-        {
-            _currentDistributionForSnapshots.Snapshots.CollectionChanged -= _snapshotsChangedHandler;
-            _snapshotsChangedHandler = null;
-        }
-
-        _currentDistributionForSnapshots = distribution;
-
-        if (distribution != null)
-        {
-            // subscribe to changes to update UI when snapshots are added/removed
-            _snapshotsChangedHandler = (s, args) => DispatcherQueue.TryEnqueue(() => UpdateSnapshotsVisibility());
-            distribution.Snapshots.CollectionChanged += _snapshotsChangedHandler;
-        }
-
-        // Ensure UI is updated immediately
-        DispatcherQueue.TryEnqueue(() => UpdateSnapshotsVisibility());
-    }
-
-    private void UpdateSnapshotsVisibility()
-    {
-        // Root of the instantiated template content
-        var root = DetailContent.ContentTemplateRoot ?? (DependencyObject)DetailContent;
-
-        var snapshotsList = FindChildByName<ListView>(root, "SnapshotsListView");
-        var emptyPanel = FindChildByName<StackPanel>(root, "SnapshotsEmptyStatePanel");
-
-        if (snapshotsList == null || emptyPanel == null)
+        if (resolvers.Count == 0)
         {
             return;
         }
 
-        var count = _currentDistributionForSnapshots?.Snapshots?.Count ?? 0;
+        var stack = new Stack<DependencyObject>();
+        stack.Push(root);
 
-        snapshotsList.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
-        emptyPanel.Visibility = count == 0 ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    // Recursive helper to find named elements in the visual tree
-    private T? FindChildByName<T>(DependencyObject parent, string name) where T : FrameworkElement
-    {
-        if (parent == null) return null;
-
-        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        while (stack.Count > 0 && resolvers.Count > 0)
         {
-            var child = VisualTreeHelper.GetChild(parent, i);
-            if (child is FrameworkElement fe)
+            var current = stack.Pop();
+            var childCount = VisualTreeHelper.GetChildrenCount(current);
+            for (var i = 0; i < childCount; i++)
             {
-                if (fe.Name == name && fe is T matched)
+                var child = VisualTreeHelper.GetChild(current, i);
+                if (child is FrameworkElement { Tag: string tag } fe && resolvers.TryGetValue(tag, out var apply))
                 {
-                    return matched;
+                    apply(fe);
+                    resolvers.Remove(tag);
+                    if (resolvers.Count == 0)
+                    {
+                        return; // all found
+                    }
                 }
+                stack.Push(child);
             }
-
-            var result = FindChildByName<T>(child, name);
-            if (result != null) return result;
-        }
-
-        return null;
-    }
-
-    /*
-     * We need to go through the Visual Tree recursively to find the Tag that matches the Distro Name received,
-     * as we cannot set a dynamic x:Name property for the Stop button.
-     */
-    private void FindDistroButton(DependencyObject parent, string searchDistroName)
-    {
-        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-        {
-            var currentChild = VisualTreeHelper.GetChild(parent, i);
-            if (currentChild != null && currentChild is Button stopButton && 
-                (string)stopButton.Tag == $"STOP_{searchDistroName}")
-            {
-                _distroStopButton = stopButton;
-            }
-            else if (currentChild != null && currentChild is Button startButton &&
-                     (string)startButton.Tag == $"START_{searchDistroName}")
-            {
-                _distroStartButton = startButton;
-            } 
-            FindDistroButton(currentChild, searchDistroName);
-        }
-    }
-
-
-    private void FindDistroStatusPanel(DependencyObject parent, string searchDistroName)
-    {
-        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-        {
-            var currentChild = VisualTreeHelper.GetChild(parent, i);
-            if (currentChild != null && currentChild is StackPanel runningPanel &&
-                (string)runningPanel.Tag == $"RUNNING_{searchDistroName}")
-            {
-                _distroRunningStatusPanel = runningPanel;
-            }
-            else if (currentChild != null && currentChild is StackPanel stoppedPanel &&
-                     (string)stoppedPanel.Tag == $"STOPPED_{searchDistroName}")
-            {
-                _distroStoppedStatusPanel = stoppedPanel;
-            }
-            FindDistroStatusPanel(currentChild, searchDistroName);
         }
     }
 }
