@@ -23,22 +23,70 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Snapshot Management"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,12"
-                       Grid.Column="0"
-                       Grid.ColumnSpan="2"
-                       Grid.Row="0"
-                       Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+            <Grid Grid.Column="0"
+                  Grid.Row="0" 
+                  ColumnSpacing="16"
+                  Margin="0 0 12 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <!-- Scrollable content region for snapshots (list or empty state) -->
+                <TextBlock Grid.Column="0" 
+                           Text="Snapshot Management"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,12"
+                           Grid.Row="0"
+                           Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                <Button Grid.Column="1" 
+                        HorizontalAlignment="Right"
+                        Width="144"
+                        Height="28"
+                        VerticalAlignment="Top"
+                        Background="{ThemeResource SystemAccentColorLight1}"
+                        Foreground="{ThemeResource SystemChromeMediumLowColor}"
+                        CornerRadius="4"
+                        Command="{x:Bind CreateSnapshotCommand, Mode=OneWay}"
+                        CommandParameter="{x:Bind DataContext}">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="8">
+                        <FontIcon Glyph="&#xE710;"
+                                  FontSize="10"
+                                  FontWeight="Bold" />
+                        <TextBlock Text="Create Snapshot"
+                                   FontSize="12"
+                                   FontWeight="SemiBold" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Column="2"
+                        HorizontalAlignment="Right"
+                        Width="144"
+                        Height="28"
+                        VerticalAlignment="Top"
+                        Background="{ThemeResource SystemAccentColorLight1}"
+                        Foreground="{ThemeResource SystemChromeMediumLowColor}"
+                        CornerRadius="4"
+                        Click="OpenSnapshotsFolder">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="8">
+                        <FontIcon Glyph="&#xE8A7;"
+                                  FontSize="10"
+                                  FontWeight="Bold" />
+                        <TextBlock Text="Open Folder"
+                                   FontSize="12"
+                                   FontWeight="SemiBold" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
             <Grid Grid.Column="0"
                   Grid.Row="1">
                     <StackPanel x:Name="SnapshotsEmptyStatePanel"
@@ -63,12 +111,12 @@
 
                     <ListView x:Name="SnapshotsListView"
                               ItemsSource="{Binding Snapshots, Mode=TwoWay}"
-                              Margin="0 0 12 0"
+                              Margin="0 16 0 0"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
                               Visibility="Collapsed"
-                              ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                              ScrollViewer.VerticalScrollMode="Disabled">
+                              ScrollViewer.VerticalScrollBarVisibility="Visible"
+                              ScrollViewer.VerticalScrollMode="Enabled">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="model:Snapshot">
                                 <Border CornerRadius="6"
@@ -156,45 +204,6 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </Grid>
-
-            <StackPanel Grid.Column="1"
-                        Grid.Row="0"
-                        Orientation="Horizontal"
-                        Spacing="8">
-                <Button Width="144"
-                        Height="28"
-                        VerticalAlignment="Top"
-                        Background="{ThemeResource SystemAccentColorLight1}"
-                        Foreground="{ThemeResource SystemChromeMediumLowColor}"
-                        CornerRadius="4"
-                        Command="{x:Bind CreateSnapshotCommand, Mode=OneWay}"
-                        CommandParameter="{x:Bind DataContext}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE710;"
-                                  FontSize="10"
-                                  FontWeight="Bold" />
-                        <TextBlock Text="Create Snapshot"
-                                   FontSize="12"
-                                   FontWeight="SemiBold" />
-                    </StackPanel>
-                </Button>
-                <Button Width="144"
-                        Height="28"
-                        VerticalAlignment="Top"
-                        Background="{ThemeResource SystemAccentColorLight1}"
-                        Foreground="{ThemeResource SystemChromeMediumLowColor}"
-                        CornerRadius="4"
-                        Click="OpenSnapshotsFolder">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE8A7;"
-                                  FontSize="10"
-                                  FontWeight="Bold" />
-                        <TextBlock Text="Open Folder"
-                                   FontSize="12"
-                                   FontWeight="SemiBold" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
         </Grid>
     </Border>
 </UserControl>

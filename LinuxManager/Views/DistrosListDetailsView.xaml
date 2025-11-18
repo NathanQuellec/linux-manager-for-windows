@@ -23,7 +23,6 @@
 		</Grid.RowDefinitions>
 
 		<Grid.Resources>
-			<!--Converters-->
 			<converters:BindingFormatHandler x:Key="ConcatString" />
 		</Grid.Resources>
 
@@ -303,23 +302,21 @@
 						<!-- Distribution detail template : layout en cartes -->
 						<DataTemplate x:Key="DistributionTemplate"
                                       x:DataType="model:Distribution">
-							<ScrollViewer  HorizontalScrollBarVisibility="Disabled"
-                                           VerticalScrollBarVisibility="Auto">
-								<Grid Padding="16"
-                                      HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Stretch">
+                            <Grid Padding="16"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch">
 									<Grid.RowDefinitions>
-										<RowDefinition Height="Auto" />
-										<!-- Header -->
-										<RowDefinition Height="Auto" />
-										<!-- Top cards: Storage & Snapshots -->
-										<RowDefinition Height="Auto" />
-										<!-- System information -->
-										<RowDefinition Height="Auto" />
-										<!-- Quick actions -->
-										<RowDefinition Height="*" />
-										<!-- Snapshot management (fills remaining space) -->
-									</Grid.RowDefinitions>
+                                        <!-- Header -->
+                                        <RowDefinition Height="Auto" />
+                                        <!-- Top cards: Storage & Snapshots -->
+                                        <RowDefinition Height="Auto" />
+                                        <!-- System information -->
+                                        <RowDefinition Height="Auto" />
+                                        <!-- Quick actions -->
+                                        <RowDefinition Height="Auto" />
+                                        <!-- Snapshot management (fills remaining space) -->
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
 
 									<!-- Header : Icon, Name, subtitle and actions -->
 									<Grid Grid.Row="0" Margin="0,0,0,20">
@@ -421,7 +418,9 @@
 									</Grid>
 
 									<!-- System information card -->
-									<Border Grid.Row="2" CornerRadius="8" Margin="0,0,0,20"
+									<Border Grid.Row="2" 
+                                            CornerRadius="8" 
+                                            Margin="0,0,0,20"
                                             Padding="16"
                                             Background="{ThemeResource LayerFillColorAltBrush}"
                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
@@ -473,7 +472,8 @@
 									</Border>
 
 									<!-- Quick actions -->
-									<Border Grid.Row="3" CornerRadius="8" Margin="0,0,0,20"
+									<Border Grid.Row="3" CornerRadius="8" 
+                                            Margin="0,0,0,20"
                                             Padding="12"
                                             Background="{ThemeResource LayerFillColorAltBrush}"
                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
@@ -542,10 +542,11 @@
 
 									<!-- Snapshot management area -->
 									<userControls:DisplaySnapshotsView Grid.Row="4"
-                                                                      DataContext="{Binding}"
-                                                                      CreateSnapshotCommand="{Binding ElementName=Page, Path=ViewModel.CreateSnapshotCommand}" />
+																	   HorizontalAlignment="Stretch"
+																	   VerticalAlignment="Stretch"
+                                                                       DataContext="{Binding}"
+                                                                       CreateSnapshotCommand="{Binding ElementName=Page, Path=ViewModel.CreateSnapshotCommand}" />
 								</Grid>
-							</ScrollViewer>
 						</DataTemplate>
 
 					</ContentControl.Resources>
