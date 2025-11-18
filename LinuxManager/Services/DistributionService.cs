@@ -13,11 +13,10 @@ namespace LinuxManager.Services;
 
 public class DistributionService : IDistributionService
 {
-    private const string WSL_UNC_PATH = @"\\wsl$";
+    private const string WSL_UNC_PATH = @"\\wsl$"; // Root UNC path for WSL file systems
 
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
-
     private readonly IDistributionInfosService _distroInfosService;
     private readonly ISnapshotService _snapshotService;
 
@@ -25,24 +24,21 @@ public class DistributionService : IDistributionService
     {
         _distros = new List<Distribution>();
         _wslApi = new WslApi();
-
         _distroInfosService = distroInfosService;
         _snapshotService = snapshotService;
     }
 
-    // TODO : Refactor InitDistributionsList
     public void InitDistributionsList()
     {
-        Log.Information("Fetching distributions list from windows registry ...");
+        Log.Information("Loading distributions from registry");
         try
         {
-
             var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
             var lxssSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
             foreach (var subKey in lxssSubKeys.GetSubKeyNames())
             {
-                // we iterate only on distros registry keys
+                // Skip non-guid keys
                 if (!subKey.StartsWith('{') || !subKey.EndsWith('}'))
                 {
                     continue;
@@ -52,7 +48,7 @@ public class DistributionService : IDistributionService
                 var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath);
                 var distroName = (string)distroSubkeys.GetValue("DistributionName");
 
-                // Filter Docker special-purpose internal Linux distros 
+                // Filter Docker internal distros
                 if (distroName != "docker-desktop" && distroName != "docker-desktop-data")
                 {
                     var distroPath = (string)distroSubkeys.GetValue("BasePath");
@@ -74,7 +70,7 @@ public class DistributionService : IDistributionService
                         .Sum(snapshot => decimal.Parse(snapshot.Size, CultureInfo.InvariantCulture))
                         .ToString(CultureInfo.InvariantCulture);
 
-                    this._distros.Add(distro);
+                    _distros.Add(distro);
                 }
                 distroSubkeys.Close();
             }
@@ -82,22 +78,15 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to fetch distributions list from windows registry - Caused by exception : {ex}");
+            Log.Error($"Failed to load distributions from registry: {ex}");
         }
     }
 
+    public IEnumerable<Distribution> GetAllDistributions() => _distros;
 
-    public IEnumerable<Distribution> GetAllDistributions()
-    {
-        return _distros;
-    }
-
-
-    // TODO : Refactor
     public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
         var distroFolder = Path.Combine(App.DistroDirPath, distroName);
-
         try
         {
             AbstractDistributionFactory factory = creationMode switch
@@ -106,17 +95,17 @@ public class DistributionService : IDistributionService
                 "Archive" => new ArchiveDistributionFactory(),
                 "Docker Hub" => new DockerHubDistributionFactory(),
                 "Vhdx" => new VhdxDistributionFactory(),
-                _ => throw new NullReferenceException(),
+                _ => throw new NullReferenceException("Unsupported creation mode"),
             };
 
             var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
 
-            // fetch distro infos created by WSL
+            // Populate additional metadata via WSL API
             var distro = _wslApi
                 .GetDistributionList()
-                .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
+                .FirstOrDefault(d => d.DistroName == newDistro.Name);
 
-            await WslHelper.TerminateDistribution(distroName); // to read ext4 file
+            await WslHelper.TerminateDistribution(distroName); // required to access ext4.vhdx
             newDistro.Id = distro.DistroId;
             newDistro.Path = distro.BasePath;
             newDistro.WslVersion = distro.WslVersion;
@@ -125,13 +114,12 @@ public class DistributionService : IDistributionService
             newDistro.DiskUsageInfo = _distroInfosService.GetDistributionDiskUsageInfo(newDistro.Name);
             newDistro.Users = _distroInfosService.GetDistributionUsers(newDistro.Name, newDistro.Path);
 
-            this._distros.Add(newDistro);
-
+            _distros.Add(newDistro);
             return newDistro;
         }
         catch (Exception ex)
         {
-            Log.Error($"Error while creating wsl distribution - Caused by {ex}");
+            Log.Error($"Error creating distribution: {ex}");
             throw;
         }
     }
@@ -143,44 +131,33 @@ public class DistributionService : IDistributionService
             .SetCreateNoWindow(true)
             .Build();
         process.Start();
-
         await process.WaitForExitAsync();
 
         if (process.HasExited)
         {
             _distros.Remove(distribution);
             RemoveDistributionFolder(distribution);
-            Log.Information($"DistributionService successfully deleted {distribution.Name}");
+            Log.Information($"Distribution removed: {distribution.Name}");
         }
     }
 
     private static void RemoveDistributionFolder(Distribution distribution)
     {
         var distroPath = Directory.GetParent(distribution.Path).FullName;
-
         if (Directory.Exists(distroPath))
         {
             Directory.Delete(distroPath, true);
         }
     }
 
-
-    /**
-     *
-     * Rename distro name in the Windows Registry.
-     * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
-     * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
-     */
-    [Obsolete("feature removed")]
+    [Obsolete("Feature removed")] // Kept for backward compatibility
     public async Task<bool> RenameDistribution(Distribution distribution, string newDistroName)
     {
-        Log.Information($"Editing registry for {distribution.Name} with key : {distribution.Id}");
+        Log.Information($"Renaming distribution in registry: {distribution.Name}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
-
         try
         {
             using var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
-
             foreach (var subKey in lxsSubKeys.GetSubKeyNames())
             {
                 if (subKey != $"{{{distribution.Id}}}")
@@ -192,7 +169,7 @@ public class DistributionService : IDistributionService
                 var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
 
                 var oldDistroName = distribution.Name;
-                await WslHelper.TerminateDistribution(newDistroName); // solve error when opening file system just after renaming distro
+                await WslHelper.TerminateDistribution(newDistroName);
                 var isFolderRenamed = RenameDistributionFolder(oldDistroName, newDistroName);
 
                 if (isFolderRenamed)
@@ -207,23 +184,21 @@ public class DistributionService : IDistributionService
                 distroSubkeys.Close();
                 return true;
             }
-
             lxsSubKeys.Close();
             return false;
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to edit registry");
+            Log.Error("Failed to rename distribution in registry");
             return false;
         }
     }
 
-    [Obsolete("feature removed")]
+    [Obsolete("Feature removed")] // Folder rename helper
     private static bool RenameDistributionFolder(string oldDistroName, string newDistroName)
     {
         var oldDistroPath = Path.Combine(App.AppDirPath, oldDistroName);
         var newDistroPath = Path.Combine(App.AppDirPath, newDistroName);
-
         try
         {
             if (!Directory.Exists(oldDistroPath))
@@ -231,10 +206,9 @@ public class DistributionService : IDistributionService
                 Log.Information("Source directory does not exist.");
                 throw new DirectoryNotFoundException();
             }
-            File.Copy(oldDistroPath, newDistroPath);
+            File.Copy(oldDistroPath, newDistroPath); // ensure content copied before rename
             Directory.Move(oldDistroPath, newDistroPath);
             Log.Information("Directory renamed successfully.");
-
             return true;
         }
         catch (Exception ex)
@@ -255,24 +229,19 @@ public class DistributionService : IDistributionService
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
-            Log.Information($"New distribution process is running wiht ID : {process.Id} and NAME : {process.ProcessName} started");
+            Log.Information($"Launch process started (PID={process.Id}) for {distribution.Name}");
             distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to start process for launching distribution {distribution.Name} - Caused by exception : {ex}");
+            Log.Error($"Failed to launch distribution {distribution.Name}: {ex}");
         }
-
     }
 
-    /** Workaround to solve file system access error (Issue : https://github.com/microsoft/wsl/issues/5307)
-        Because a distribution need to be running to use its file system, 
-        we quickly start and stop the corresponding distribution to avoid an error  
-    **/
+    // Start distribution silently to guarantee file system availability (WSL issue #5307 workaround)
     private static void BackgroundLaunchDistribution(Distribution distribution)
     {
-        Log.Information($"Launching distribution {distribution.Name} in background ...");
-
+        Log.Information($"Background start for {distribution.Name}");
         try
         {
             var process = new ProcessBuilder("cmd.exe")
@@ -281,11 +250,10 @@ public class DistributionService : IDistributionService
                 .SetUseShellExecute(false)
                 .Build();
             process.Start();
-
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to start process for launching distribution in the background - Caused by exception : {ex}");
+            Log.Error($"Failed background start: {ex}");
         }
     }
 
@@ -293,41 +261,36 @@ public class DistributionService : IDistributionService
     {
         if (distribution.RunningProcesses.Count == 0)
         {
-            Log.Warning($"Trying to stop {distribution.Name} but they aren't processes running for it");
+            Log.Warning($"No processes to stop for {distribution.Name}");
+            return;
         }
-        else
+
+        foreach (var process in distribution.RunningProcesses)
         {
-            foreach (var process in distribution.RunningProcesses)
+            process.CloseMainWindow();
+            await process.WaitForExitAsync();
+            if (process.HasExited)
             {
-
-                process.CloseMainWindow();
-                await process.WaitForExitAsync();
-
-                if (process.HasExited)
-                {
-                    Log.Information($"Process ID : {process.Id} and NAME : {process.ProcessName} is closed");
-                }
-                else
-                {
-                    process.Kill();
-                }
+                Log.Information($"Process exited (PID={process.Id})");
             }
-            distribution.RunningProcesses.Clear();
+            else
+            {
+                process.Kill();
+            }
         }
+        distribution.RunningProcesses.Clear();
     }
 
     public async void OpenDistributionFileSystem(Distribution distribution)
     {
-        var distroFileSystem = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
+        var distroFileSystem = Path.Combine(WSL_UNC_PATH, distribution.Name);
         try
         {
             var distroIsRunning = await WslHelper.CheckRunningDistribution(distribution.Name);
-
             if (!distroIsRunning)
             {
                 BackgroundLaunchDistribution(distribution);
             }
-
             var processBuilder = new ProcessBuilder("explorer.exe")
                 .SetArguments(distroFileSystem)
                 .Build();
@@ -335,9 +298,8 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to start process for opening distribution file system - Caused by exception : {ex}");
+            Log.Error($"Failed to open file system for {distribution.Name}: {ex}");
         }
-
     }
 
     public void OpenDistributionWithVsCode(Distribution distribution)
@@ -359,17 +321,37 @@ public class DistributionService : IDistributionService
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
-            Log.Information($"Process ID : {process.Id} and NAME : {process.ProcessName} started");
-            // distribution?.RunningProcesses.Add(process);
+            Log.Information($"Windows Terminal started (PID={process.Id}) for {distribution.Name}");
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to start process for opening distro with WinTerm - Caused by exception : {ex}");
+            Log.Error($"Failed to open Windows Terminal for {distribution.Name}: {ex}");
         }
     }
 
-    public string GetLastSnapshotDate(Distribution distribution)
+    public void OpenDistroInstallationLocation(Distribution distribution)
     {
-        return distribution.Snapshots.Count == 0 ? "Never" : distribution.Snapshots.OrderByDescending(s => s.CreationDate).First().CreationDate;
+        try
+        {
+            var target = distribution.Path;
+            if (File.Exists(target))
+            {
+                target = Directory.GetParent(target)?.FullName ?? target; // Show containing folder if path is a file
+            }
+            if (!Directory.Exists(target))
+            {
+                Log.Warning($"Installation location not found for {distribution.Name}: {target}");
+                return;
+            }
+            var processBuilder = new ProcessBuilder("explorer.exe")
+                .SetArguments(target)
+                .Build();
+            processBuilder.Start();
+            Log.Information($"Opening installation location: {target}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to open installation location for {distribution.Name}: {ex}");
+        }
     }
 }

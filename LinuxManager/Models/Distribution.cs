@@ -25,17 +25,6 @@ public class Distribution : INotifyPropertyChanged, IBaseModel
 
     public ObservableCollection<Snapshot> Snapshots { get; set; } = new();
 
-    private string? _lastSnapshotDate;
-    public string LastSnapshotDate
-    {
-        get => Snapshots.MaxBy(s => s.CreationDate)?.CreationDate ?? "Never";
-        set
-        {
-            _lastSnapshotDate = value;
-            OnPropertyChanged();
-        }
-    }
-
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
     private string _name;

@@ -214,7 +214,6 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <!-- Left: OsName and OsVersion -->
                                                 <StackPanel Grid.Column="0"
                                                             Orientation="Horizontal"
                                                             VerticalAlignment="Center">
@@ -230,7 +229,6 @@
                                                                FontSize="8"
                                                                VerticalAlignment="Center" />
                                                 </StackPanel>
-                                                <!-- Right: Running / Stopped indicators -->
                                                 <StackPanel Grid.Column="1"
                                                             Orientation="Horizontal"
                                                             VerticalAlignment="Center"
@@ -332,7 +330,6 @@
                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
                                             BorderThickness="1"
                                             VerticalAlignment="Center">
-                                        <!-- Si tu as un logo, remplace le FontIcon par Image -->
                                         <FontIcon Glyph="&#xE7FD;"
                                                   VerticalAlignment="Center"
                                                   HorizontalAlignment="Center" />
@@ -368,7 +365,6 @@
                                             <TextBlock Text="Storage"
                                                        FontWeight="SemiBold"
                                                        Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                            <!-- Taille: remplace la valeur statique par un binding si tu as une propriété Size (GB) -->
                                             <TextBlock Text="{x:Bind Path=system:String.Format('{0} GB', DiskUsageInfo.Used)}"
                                                        FontSize="24"
                                                        FontWeight="Bold"
@@ -402,18 +398,10 @@
                                             <TextBlock Text="Snapshots"
                                                        FontWeight="SemiBold"
                                                        Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                            <!-- Utilise binding vers Snapshots.Count -->
                                             <TextBlock Text="{x:Bind Snapshots.Count, Mode=OneWay}"
                                                        FontSize="24"
                                                        FontWeight="Bold"
                                                        Margin="0,8,0,4" />
-                                            <TextBlock Text="Last snapshot"
-                                                       Foreground="{ThemeResource SystemColorGrayTextColor}"
-                                                       FontSize="12" />
-                                            <!-- Exemple statique : remplace par binding à la date de snapshot si disponible -->
-                                            <TextBlock Text="{x:Bind LastSnapshotDate}"
-                                                       FontSize="12"
-                                                       Margin="0,8,0,0" />
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -439,6 +427,7 @@
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Installation Location"
                                                            FontSize="12"
+                                                           FontWeight="SemiBold"
                                                            Foreground="{ThemeResource SystemColorGrayTextColor}" />
                                                 <Border Padding="8"
                                                         Margin="0,8,0,0"
@@ -447,30 +436,18 @@
                                                         BorderThickness="1">
                                                     <StackPanel Orientation="Horizontal"
                                                                 Spacing="8">
-                                                        <FontIcon Glyph="&#xED25;" />
-                                                        <TextBox x:Name="distroPath"
-                                                                 Text="{x:Bind Path}"
-                                                                 Background="Transparent"
-                                                                 BorderThickness="0"
-                                                                 FontWeight="SemiBold"
-                                                                 IsReadOnly="True"
-                                                                 TextWrapping="Wrap"
-                                                                 FontSize="12" />
+                                                        <Button Style="{StaticResource MinimalistButtonStyle}"
+                                                                ToolTipService.ToolTip="Open folder"
+                                                                Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroInstallationLocationCommand}"
+                                                                CommandParameter="{x:Bind}">
+                                                            <FontIcon Glyph="&#xED25;" />
+                                                        </Button>
+                                                        <TextBlock Text="{x:Bind Path}"
+                                                                   FontWeight="SemiBold"
+                                                                   TextWrapping="Wrap"
+                                                                   FontSize="12" 
+                                                                   Margin="0 8 0 0"/>
                                                     </StackPanel>
-                                                </Border>
-                                            </StackPanel>
-                                            <!-- Last activity -->
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Last Activity"
-                                                           FontSize="12"
-                                                           Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                                <Border Padding="8"
-                                                        Margin="0,8,0,0"
-                                                        CornerRadius="6"
-                                                        BorderBrush="{ThemeResource SubtleBorderBrush}"
-                                                        BorderThickness="1">
-                                                    <TextBlock Text="1 week ago"
-                                                               FontSize="12" />
                                                 </Border>
                                             </StackPanel>
                                         </Grid>

@@ -4,11 +4,13 @@ using Microsoft.UI.Xaml.Controls;
 using Serilog;
 using LinuxManager.Contracts.Services;
 using LinuxManager.Models;
-using LinuxManager.ViewModels; // for DistrosListDetailsVM reference
 using CommunityToolkit.WinUI.UI;
 
 namespace LinuxManager.ViewModels;
 
+/// <summary>
+/// ViewModel for snapshot display and related actions.
+/// </summary>
 public class DisplaySnapshotsVM : ObservableObject
 {
     private readonly ISnapshotService _snapshotService;
@@ -27,17 +29,20 @@ public class DisplaySnapshotsVM : ObservableObject
     {
         try
         {
-            Log.Information("Deleting snapshot record");
+            Log.Information($"Deleting snapshot metadata for {snapshot.Name}");
             _snapshotService.DeleteSnapshotInfosRecord(snapshot);
             Log.Information("Deleting snapshot file");
             File.Delete(snapshot.Path);
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to delete snapshot {snapshot.Name} - Caused by {ex}");
+            Log.Error($"Failed deleting snapshot {snapshot.Name}: {ex}");
         }
     }
 
+    /// <summary>
+    /// Create a new distribution from a snapshot (dialog primary action).
+    /// </summary>
     public async void CreateDistroFromSnapshot(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         try
@@ -47,13 +52,15 @@ public class DisplaySnapshotsVM : ObservableObject
             var snapshot = sender.DataContext as Snapshot;
             _distrosViewModel.ValidateDistributionName(sender, args);
             await _distrosViewModel.CreateDistributionViewModel(distroNameInput!.Text, snapshot!.Type, snapshot!.Path);
-            App.IsDistributionProcessing = false;
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to create distribution from snapshot - Caused by {ex}");
-            App.IsDistributionProcessing = false;
+            Log.Error($"Failed creating distro from snapshot: {ex}");
             args.Cancel = true;
+        }
+        finally
+        {
+            App.IsDistributionProcessing = false;
         }
     }
 }
