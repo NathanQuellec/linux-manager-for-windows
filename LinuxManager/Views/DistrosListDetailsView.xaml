@@ -16,38 +16,38 @@
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
 
-        <Grid.Resources>
-            <!--Converters-->
-            <converters:BindingFormatHandler x:Key="ConcatString" />
-        </Grid.Resources>
+		<Grid.Resources>
+			<!--Converters-->
+			<converters:BindingFormatHandler x:Key="ConcatString" />
+		</Grid.Resources>
 
-        <StackPanel x:Name="AppTitleBar"
+		<StackPanel x:Name="AppTitleBar"
                     Orientation="Horizontal"
                     Grid.Row="0"
                     BorderBrush="{ThemeResource SubtleBorderBrush}"
                     BorderThickness="0 1 0 1">
-            <Image Source="/Assets/LinuxManagerIcon.ico"
+			<Image Source="/Assets/LinuxManagerIcon.ico"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Center"
                    Width="20"
                    Height="20"
                    Margin="8,6, 4, 4" />
-            <TextBlock x:Name="AppTitleTextBlock"
+			<TextBlock x:Name="AppTitleTextBlock"
                        Text="Linux Manager"
                        TextWrapping="NoWrap"
                        FontWeight="SemiBold"
                        Style="{StaticResource CaptionTextBlockStyle}"
                        VerticalAlignment="Center"
                        Margin="4,4,0,4" />
-        </StackPanel>
+		</StackPanel>
 
-        <SplitView Grid.Row="1"
+		<SplitView Grid.Row="1"
                    DisplayMode="Inline"
                    IsPaneOpen="True"
                    OpenPaneLength="300"
@@ -56,32 +56,32 @@
                    BorderThickness="0 0 1 0"
                    BorderBrush="{ThemeResource SubtleBorderBrush}">
 
-            <!-- Master List (Pane) -->
-            <SplitView.Pane>
+			<!-- Master List (Pane) -->
+			<SplitView.Pane>
 
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0"
+					<StackPanel Grid.Row="0"
                                 Spacing="16"
                                 BorderThickness="0 0 0 1"
                                 BorderBrush="{ThemeResource SubtleBorderBrush}">
-                        <StackPanel Margin="20 0 0 0">
-                            <TextBlock Text="WSL Distributions"
+						<StackPanel Margin="20 0 0 0">
+							<TextBlock Text="WSL Distributions"
                                        FontSize="14"
                                        FontWeight="SemiBold"
                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                        Margin="0 16 0 0" />
-                            <TextBlock Text="Manage your Linux environments"
+							<TextBlock Text="Manage your Linux environments"
                                        FontSize="10"
                                        Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                        </StackPanel>
+						</StackPanel>
 
-                        <Button Content="+  Install Distribution"
+						<Button Content="+  Install Distribution"
                                 HorizontalAlignment="Stretch"
                                 Height="28"
                                 Background="{ThemeResource SystemAccentColorLight1}"
@@ -91,95 +91,97 @@
                                 FontSize="12"
                                 Margin="20 0 20 16"
                                 Command="{Binding ElementName=Page, Path=ViewModel.CreateDistroCommand}" />
-                    </StackPanel>
+					</StackPanel>
 
-                    <StackPanel Grid.Row="1"
+					<StackPanel Grid.Row="1"
                                 Orientation="Horizontal"
                                 Spacing="180"
                                 Margin="20 8 0 0">
-                        <TextBlock Text="DISTRIBUTIONS"
+						<TextBlock Text="DISTRIBUTIONS"
                                    FontSize="10"
                                    FontWeight="Medium"
                                    Foreground="{ThemeResource SystemColorGrayTextColor}" />
 
-                        <TextBlock Text="{Binding ElementName=Page, Path=ViewModel.Distros.Count, Mode=TwoWay}"
+						<TextBlock Text="{Binding ElementName=Page, Path=ViewModel.Distros.Count, Mode=TwoWay}"
                                    FontSize="10"
                                    Foreground="{ThemeResource SystemColorGrayTextColor}" />
 
-                    </StackPanel>
+					</StackPanel>
 
-                    <ListView x:Name="MasterListView"
+					<ListView x:Name="MasterListView"
                               Grid.Row="2"
                               IsItemClickEnabled="True"
                               SelectionMode="Single"
                               ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}">
 
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="model:Distribution">
-                                <StackPanel BorderThickness="1"
+						<ListView.ItemTemplate>
+							<DataTemplate x:DataType="model:Distribution">
+								<StackPanel BorderThickness="1"
                                             Height="80">
-                                    <StackPanel.Resources>
-                                        <MenuFlyout x:Key="DistroMenuFlyout">
+									<StackPanel.Resources>
+										<MenuFlyout x:Key="DistroMenuFlyout">
 
-                                            <MenuFlyoutItem Text="Browse Files"
+											<MenuFlyoutItem Text="Browse Files"
                                                             Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithFileExplorerCommand}"
                                                             CommandParameter="{x:Bind}">
-                                                <MenuFlyoutItem.Icon>
-                                                    <FontIcon Glyph="&#xEC50;" />
-                                                </MenuFlyoutItem.Icon>
-                                            </MenuFlyoutItem>
+												<MenuFlyoutItem.Icon>
+													<FontIcon Glyph="&#xEC50;" />
+												</MenuFlyoutItem.Icon>
+											</MenuFlyoutItem>
 
-                                            <MenuFlyoutItem Text="VS Code"
+											<MenuFlyoutItem Text="VS Code"
                                                             Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithVsCodeCommand}"
                                                             CommandParameter="{x:Bind}">
-                                                <MenuFlyoutItem.Icon>
-                                                    <FontIcon Glyph="&#xE943;" />
-                                                </MenuFlyoutItem.Icon>
-                                            </MenuFlyoutItem>
+												<MenuFlyoutItem.Icon>
+													<FontIcon Glyph="&#xE943;" />
+												</MenuFlyoutItem.Icon>
+											</MenuFlyoutItem>
 
-                                            <MenuFlyoutItem Text="Terminal"
+											<MenuFlyoutItem Text="Terminal"
                                                             Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithWinTermCommand}"
                                                             CommandParameter="{x:Bind}">
-                                                <MenuFlyoutItem.Icon>
-                                                    <FontIcon Glyph="&#xE756;" />
-                                                </MenuFlyoutItem.Icon>
-                                            </MenuFlyoutItem>
+												<MenuFlyoutItem.Icon>
+													<FontIcon Glyph="&#xE756;" />
+												</MenuFlyoutItem.Icon>
+											</MenuFlyoutItem>
 
-                                            <MenuFlyoutItem Text="Delete"
+											<MenuFlyoutItem Text="Delete"
+															Foreground="{ThemeResource DeleteButton}"
                                                             Command="{Binding ElementName=Page, Path=ViewModel.RemoveDistroCommand}"
                                                             CommandParameter="{x:Bind}">
-                                                <MenuFlyoutItem.Icon>
-                                                    <FontIcon Glyph="&#xE74D;" />
-                                                </MenuFlyoutItem.Icon>
-                                            </MenuFlyoutItem>
+												<MenuFlyoutItem.Icon>
+													<FontIcon Glyph="&#xE74D;"
+                                                              Foreground="{ThemeResource DeleteButton}"/>
+												</MenuFlyoutItem.Icon>
+											</MenuFlyoutItem>
 
-                                        </MenuFlyout>
-                                    </StackPanel.Resources>
+										</MenuFlyout>
+									</StackPanel.Resources>
 
-                                    <RelativePanel ContextFlyout="{StaticResource DistroMenuFlyout}"
+									<RelativePanel ContextFlyout="{StaticResource DistroMenuFlyout}"
                                                    Height="80"
                                                    BorderThickness="1"
                                                    VerticalAlignment="Center"
                                                    Background="Transparent"
                                                    Margin="0 8 0 12">
 
-                                        <ToolTipService.ToolTip>
-                                            <ToolTip Content="Right-Click" />
-                                        </ToolTipService.ToolTip>
+										<ToolTipService.ToolTip>
+											<ToolTip Content="Right-Click" />
+										</ToolTipService.ToolTip>
 
-                                        <!-- Launch Button with unique tag -->
-                                        <Button x:Name="LaunchButton"
+										<!-- Launch Button with unique tag -->
+										<Button x:Name="LaunchButton"
                                                 Style="{StaticResource MinimalistButtonStyle}"
                                                 Tag="{x:Bind Path=system:String.Format('START_{0}', Name), Mode=OneWay}"
                                                 Margin="0 12 0 0"
                                                 Command="{Binding ElementName=Page, Path=ViewModel.LaunchDistroCommand}"
                                                 CommandParameter="{x:Bind}">
-                                            <FontIcon Glyph="&#xE768;"
+											<FontIcon Glyph="&#xE768;"
                                                       FontSize="24" />
-                                        </Button>
+										</Button>
 
-                                        <!-- Stop Button with unique tag -->
-                                        <Button x:Name="StopButton"
+										<!-- Stop Button with unique tag -->
+										<Button x:Name="StopButton"
                                                 RelativePanel.RightOf="LaunchButton"
                                                 Style="{StaticResource MinimalistButtonStyle}"
                                                 Tag="{x:Bind Path=system:String.Format('STOP_{0}', Name), Mode=OneWay}"
@@ -187,22 +189,22 @@
                                                 Margin="0 12 0 0"
                                                 Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
                                                 CommandParameter="{x:Bind}">
-                                            <SymbolIcon Symbol="Stop"
+											<SymbolIcon Symbol="Stop"
                                                         Height="24"
                                                         Width="24" />
-                                        </Button>
+										</Button>
 
-                                        <!-- Distro info replaced: use Grid to occupy remaining space to the right -->
-                                        <Grid RelativePanel.RightOf="StopButton"
+										<!-- Distro info replaced: use Grid to occupy remaining space to the right -->
+										<Grid RelativePanel.RightOf="StopButton"
                                               RelativePanel.AlignRightWithPanel="True"
                                               HorizontalAlignment="Stretch"
                                               Margin="4 12 0 0">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
+											<Grid.RowDefinitions>
+												<RowDefinition Height="Auto" />
+												<RowDefinition Height="Auto" />
+											</Grid.RowDefinitions>
 
-                                            <TextBlock x:Name="DistroName"
+											<TextBlock x:Name="DistroName"
                                                        Grid.Row="0"
                                                        Style="{StaticResource BodyTextBlockStyle}"
                                                        Text="{x:Bind Name, Mode=TwoWay}"
@@ -210,412 +212,522 @@
                                                        FontWeight="Medium"
                                                        VerticalAlignment="Center"
                                                        Margin="4 0 0 4" />
-
-                                            <Grid Grid.Row="1">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <!-- Left: OsName and OsVersion -->
-                                                <StackPanel Grid.Column="0"
+											<Grid Grid.Row="1">
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition Width="*" />
+													<ColumnDefinition Width="Auto" />
+												</Grid.ColumnDefinitions>
+												<!-- Left: OsName and OsVersion -->
+												<StackPanel Grid.Column="0"
                                                             Orientation="Horizontal"
                                                             VerticalAlignment="Center">
-                                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+													<TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                                                Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                                Text="{x:Bind OsName, Mode=TwoWay}"
                                                                FontSize="8"
                                                                VerticalAlignment="Center"
                                                                Margin="4 0 6 0" />
-                                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+													<TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                                                Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                                Text="{x:Bind OsVersion, Mode=TwoWay}"
                                                                FontSize="8"
                                                                VerticalAlignment="Center" />
-                                                </StackPanel>
-
-                                                <!-- Right: Running / Stopped indicators -->
-                                                <StackPanel Grid.Column="1"
+												</StackPanel>
+												<!-- Right: Running / Stopped indicators -->
+												<StackPanel Grid.Column="1"
                                                             Orientation="Horizontal"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Right">
-                                                    <StackPanel Orientation="Horizontal"
+													<StackPanel Orientation="Horizontal"
                                                                 Visibility="Collapsed"
                                                                 Tag="{x:Bind Path=system:String.Format('RUNNING_{0}', Name), Mode=OneWay}">
-                                                        <FontIcon Glyph="&#xEA81;"
+														<FontIcon Glyph="&#xEA81;"
                                                                   FontSize="12"
                                                                   VerticalAlignment="Center"
                                                                   Foreground="ForestGreen"
                                                                   Margin="12 0 4 4" />
-                                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+														<TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                                                    Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                                    Text="Running"
                                                                    FontSize="8"
                                                                    VerticalAlignment="Center" />
-                                                    </StackPanel>
-
-                                                    <StackPanel Orientation="Horizontal"
+													</StackPanel>
+													<StackPanel Orientation="Horizontal"
                                                                 Tag="{x:Bind Path=system:String.Format('STOPPED_{0}', Name), Mode=OneWay}">
-                                                        <FontIcon Glyph="&#xEA81;"
+														<FontIcon Glyph="&#xEA81;"
                                                                   FontSize="12"
                                                                   VerticalAlignment="Center"
                                                                   Foreground="Gray"
                                                                   Margin="12 0 4 4" />
-                                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+														<TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                                                    Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                                    Text="Stopped"
                                                                    FontSize="8"
                                                                    VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Grid>
-                                    </RelativePanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </Grid>
-            </SplitView.Pane>
+													</StackPanel>
+												</StackPanel>
+											</Grid>
+										</Grid>
+									</RelativePanel>
+								</StackPanel>
+							</DataTemplate>
+						</ListView.ItemTemplate>
+					</ListView>
+				</Grid>
+			</SplitView.Pane>
 
-            <!-- Detail Content -->
-            <SplitView.Content>
-                <ContentControl x:Name="DetailContent"
+			<!-- Detail Content -->
+			<SplitView.Content>
+				<ContentControl x:Name="DetailContent"
                                 Content="{x:Bind MasterListView.SelectedItem, Mode=OneWay}"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Stretch">
 
-                    <ContentControl.Resources>
-                        <!-- Default template -->
-                        <DataTemplate x:Key="DefaultContentTemplate">
-                            <Grid>
-                                <Grid HorizontalAlignment="Center"
+					<ContentControl.Resources>
+						<!-- Default template -->
+						<DataTemplate x:Key="DefaultContentTemplate">
+							<Grid>
+								<Grid HorizontalAlignment="Center"
                                       VerticalAlignment="Center">
-                                    <TextBlock Text="Select a distribution to view details"
+									<TextBlock Text="Select a distribution to view details"
                                                FontSize="24"
                                                TextAlignment="Center"
                                                TextWrapping="Wrap"
                                                Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                </Grid>
-                            </Grid>
-                        </DataTemplate>
+								</Grid>
+							</Grid>
+						</DataTemplate>
 
-                        <!-- Distribution detail template : layout en cartes -->
-                        <DataTemplate x:Key="DistributionTemplate"
+						<!-- Distribution detail template : layout en cartes -->
+						<DataTemplate x:Key="DistributionTemplate"
                                       x:DataType="model:Distribution">
-                            <ScrollViewer  HorizontalScrollBarVisibility="Disabled"
+							<ScrollViewer  HorizontalScrollBarVisibility="Disabled"
                                            VerticalScrollBarVisibility="Auto">
-                                <StackPanel Spacing="20"
-                                            Padding="16"
-                                            HorizontalAlignment="Stretch"
-                                            VerticalAlignment="Stretch">
+								<Grid Padding="16"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch">
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto" />
+										<!-- Header -->
+										<RowDefinition Height="Auto" />
+										<!-- Top cards: Storage & Snapshots -->
+										<RowDefinition Height="Auto" />
+										<!-- System information -->
+										<RowDefinition Height="Auto" />
+										<!-- Quick actions -->
+										<RowDefinition Height="*" />
+										<!-- Snapshot management (fills remaining space) -->
+									</Grid.RowDefinitions>
 
-                                    <!-- Header : Icon, Name, subtitle and actions -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- Icon -->
-                                        <Border Width="48"
+									<!-- Header : Icon, Name, subtitle and actions -->
+									<Grid Grid.Row="0" Margin="0,0,0,20">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto" />
+											<ColumnDefinition Width="*" />
+											<ColumnDefinition Width="Auto" />
+										</Grid.ColumnDefinitions>
+										<!-- Icon -->
+										<Border Width="48"
                                                 Height="48"
                                                 CornerRadius="8"
                                                 Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                                                 BorderBrush="{ThemeResource SubtleBorderBrush}"
                                                 BorderThickness="1"
                                                 VerticalAlignment="Center">
-                                            <!-- Si tu as un logo, remplace le FontIcon par Image -->
-                                            <FontIcon Glyph="&#xE7FD;"
+											<!-- Si tu as un logo, remplace le FontIcon par Image -->
+											<FontIcon Glyph="&#xE7FD;"
                                                       VerticalAlignment="Center"
                                                       HorizontalAlignment="Center" />
-                                        </Border>
-
-                                        <StackPanel Grid.Column="1"
+										</Border>
+										<StackPanel Grid.Column="1"
                                                     Margin="12,0,0,0"
                                                     VerticalAlignment="Center">
-                                            <TextBlock Text="{x:Bind Name}"
+											<TextBlock Text="{x:Bind Name}"
                                                        FontSize="20"
                                                        FontWeight="SemiBold" />
-                                            <TextBlock Text="{x:Bind OsName}"
+											<TextBlock Text="{x:Bind OsName}"
                                                        FontSize="12"
                                                        Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                        </StackPanel>
-                                    </Grid>
+										</StackPanel>
+									</Grid>
 
-                                    <!-- Top cards row : Storage & Snapshots -->
-                                    <Grid ColumnSpacing="16">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- Storage card -->
-                                        <Border Grid.Column="0"
+									<!-- Top cards row : Storage & Snapshots -->
+									<Grid Grid.Row="1" ColumnSpacing="16" Margin="0,0,0,20">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="2*" />
+											<ColumnDefinition Width="*" />
+										</Grid.ColumnDefinitions>
+										<!-- Storage card -->
+										<Border Grid.Column="0"
                                                 CornerRadius="8"
                                                 Padding="16"
                                                 Background="{ThemeResource LayerFillColorAltBrush}"
                                                 BorderBrush="{ThemeResource SubtleBorderBrush}"
                                                 BorderThickness="1">
-                                            <StackPanel>
-                                                <TextBlock Text="Storage"
+											<StackPanel>
+												<TextBlock Text="Storage"
                                                            FontWeight="SemiBold"
                                                            Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                                <!-- Taille: remplace la valeur statique par un binding si tu as une propriété Size (GB) -->
-                                                <TextBlock Text="{x:Bind Path=system:String.Format('{0} GB', DiskUsageInfo.Used)}"
+												<!-- Taille: remplace la valeur statique par un binding si tu as une propriÃ©tÃ© Size (GB) -->
+												<TextBlock Text="{x:Bind Path=system:String.Format('{0} GB', DiskUsageInfo.Used)}"
                                                            FontSize="24"
                                                            FontWeight="Bold"
                                                            Margin="0,8,0,4" />
-                                                <ProgressBar Value="{x:Bind Path=DiskUsageInfo.UsePercentage}"
+												<ProgressBar Value="{x:Bind Path=DiskUsageInfo.UsePercentage}"
                                                              Maximum="100"
                                                              Height="8"
                                                              Margin="0,4,8,4"
                                                              Foreground="{ThemeResource SystemControlHighlightAccentBrush}" />
-                                                <StackPanel Orientation="Horizontal" 
+												<StackPanel Orientation="Horizontal"
                                                             VerticalAlignment="Center">
-                                                    <TextBlock Text="{x:Bind Path=system:String.Format('{0}% used', DiskUsageInfo.UsePercentage)}"
+													<TextBlock Text="{x:Bind Path=system:String.Format('{0}% used', DiskUsageInfo.UsePercentage)}"
                                                                FontSize="12"
                                                                Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                                Margin="0,8,4,0" />
-                                                    <TextBlock Text="{x:Bind Path=system:String.Format('of {0} GB', DiskUsageInfo.Size)}"
+													<TextBlock Text="{x:Bind Path=system:String.Format('of {0} GB', DiskUsageInfo.Size)}"
                                                                FontSize="12"
                                                                Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                                Margin="0,8,0,0" />
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-
-                                        <!-- Snapshots card -->
-                                        <Border Grid.Column="1"
+												</StackPanel>
+											</StackPanel>
+										</Border>
+										<!-- Snapshots card -->
+										<Border Grid.Column="1"
                                                 CornerRadius="8"
                                                 Padding="16"
                                                 Background="{ThemeResource LayerFillColorAltBrush}"
                                                 BorderBrush="{ThemeResource SubtleBorderBrush}"
                                                 BorderThickness="1">
-                                            <StackPanel>
-                                                <TextBlock Text="Snapshots"
+											<StackPanel>
+												<TextBlock Text="Snapshots"
                                                            FontWeight="SemiBold"
                                                            Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                                <!-- Utilise binding vers Snapshots.Count -->
-                                                <TextBlock Text="{x:Bind Snapshots.Count, Mode=OneWay}"
+												<!-- Utilise binding vers Snapshots.Count -->
+												<TextBlock Text="{x:Bind Snapshots.Count, Mode=OneWay}"
                                                            FontSize="24"
                                                            FontWeight="Bold"
                                                            Margin="0,8,0,4" />
-                                                <TextBlock Text="Last snapshot"
+												<TextBlock Text="Last snapshot"
                                                            Foreground="{ThemeResource SystemColorGrayTextColor}"
                                                            FontSize="12" />
-                                                <!-- Exemple statique : remplace par binding à la date de snapshot si disponible -->
-                                                <TextBlock Text="{x:Bind LastSnapshotDate}"
+												<!-- Exemple statique : remplace par binding Ã  la date de snapshot si disponible -->
+												<TextBlock Text="{x:Bind LastSnapshotDate}"
                                                            FontSize="12"
                                                            Margin="0,8,0,0" />
-                                            </StackPanel>
-                                        </Border>
-                                    </Grid>
+											</StackPanel>
+										</Border>
+									</Grid>
 
-                                    <!-- System information card -->
-                                    <Border CornerRadius="8"
+									<!-- System information card -->
+									<Border Grid.Row="2" CornerRadius="8" Margin="0,0,0,20"
                                             Padding="16"
                                             Background="{ThemeResource LayerFillColorAltBrush}"
                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
                                             BorderThickness="1">
-                                        <StackPanel>
-                                            <TextBlock Text="System Information"
+										<StackPanel>
+											<TextBlock Text="System Information"
                                                        FontWeight="SemiBold"
                                                        Margin="0,0,0,12" />
-                                            <Grid ColumnSpacing="12">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="2*" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <!-- Installation location -->
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="Installation Location"
+											<Grid ColumnSpacing="12">
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition Width="2*" />
+													<ColumnDefinition Width="*" />
+												</Grid.ColumnDefinitions>
+												<!-- Installation location -->
+												<StackPanel Grid.Column="0">
+													<TextBlock Text="Installation Location"
                                                                FontSize="12"
                                                                Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                                    <!-- Valeur d'exemple : remplace par binding si tu as le path -->
-                                                    <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+													<!-- Valeur d'exemple : remplace par binding si tu as le path -->
+													<Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                                                             Padding="8"
                                                             Margin="0,8,0,0"
                                                             CornerRadius="6"
                                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
                                                             BorderThickness="1">
-                                                        <TextBlock Text="PATH"
+														<TextBlock Text="PATH"
                                                                    TextWrapping="Wrap"
                                                                    FontSize="12" />
-                                                    </Border>
-                                                </StackPanel>
-
-                                                <!-- Last activity -->
-                                                <StackPanel Grid.Column="1">
-                                                    <TextBlock Text="Last Activity"
+													</Border>
+												</StackPanel>
+												<!-- Last activity -->
+												<StackPanel Grid.Column="1">
+													<TextBlock Text="Last Activity"
                                                                FontSize="12"
                                                                Foreground="{ThemeResource SystemColorGrayTextColor}" />
-                                                    <!-- Exemple statique -->
-                                                    <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+													<!-- Exemple statique -->
+													<Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                                                             Padding="8"
                                                             Margin="0,8,0,0"
                                                             CornerRadius="6"
                                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
                                                             BorderThickness="1">
-                                                        <TextBlock Text="1 week ago"
+														<TextBlock Text="1 week ago"
                                                                    FontSize="12" />
-                                                    </Border>
-                                                </StackPanel>
-                                            </Grid>
-                                        </StackPanel>
-                                    </Border>
+													</Border>
+												</StackPanel>
+											</Grid>
+										</StackPanel>
+									</Border>
 
-                                    <!-- Quick actions -->
-                                    <Border CornerRadius="8"
+									<!-- Quick actions -->
+									<Border Grid.Row="3" CornerRadius="8" Margin="0,0,0,20"
                                             Padding="12"
                                             Background="{ThemeResource LayerFillColorAltBrush}"
                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
                                             BorderThickness="1">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
 
-                                            <StackPanel Orientation="Horizontal"
-                                                        Spacing="24"
-                                                        VerticalAlignment="Center">
-                                                <Button Style="{StaticResource MinimalistButtonStyle}"
-                                                        Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithWinTermCommand}"
-                                                        CommandParameter="{x:Bind}">
-                                                    <StackPanel Orientation="Horizontal"
-                                                                Spacing="8">
-                                                        <FontIcon Glyph="&#xE756;" />
-                                                        <TextBlock Text="Terminal"
-                                                                   VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                </Button>
-                                                <Button Style="{StaticResource MinimalistButtonStyle}"
-                                                        Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithVsCodeCommand}"
-                                                        CommandParameter="{x:Bind}">
-                                                    <StackPanel Orientation="Horizontal"
-                                                                Spacing="8">
-                                                        <FontIcon Glyph="&#xE943;" />
-                                                        <TextBlock Text="VS Code"
-                                                                   VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                </Button>
-                                                <Button Style="{StaticResource MinimalistButtonStyle}"
-                                                        Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithFileExplorerCommand}"
-                                                        CommandParameter="{x:Bind}">
-                                                    <StackPanel Orientation="Horizontal"
-                                                                Spacing="8">
-                                                        <FontIcon Glyph="&#xEC50;" />
-                                                        <TextBlock Text="Browse Files"
-                                                                   VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                </Button>
-                                                <Button Style="{StaticResource MinimalistButtonStyle}">
-                                                    <StackPanel Orientation="Horizontal"
-                                                                Spacing="8">
-                                                        <FontIcon Glyph="&#xE8EE;" />
-                                                        <TextBlock Text="Export"
-                                                                   VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                </Button>
-                                                <Button Style="{StaticResource MinimalistButtonStyle}">
-                                                    <StackPanel Orientation="Horizontal"
-                                                                Spacing="8">
-                                                        <FontIcon Glyph="&#xE8C8;" />
-                                                        <TextBlock Text="Clone"
-                                                                   VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                </Button>
-                                            </StackPanel>
+										<StackPanel Orientation="Horizontal"
+													Spacing="120"
+													VerticalAlignment="Center"
+													HorizontalAlignment="Center"
+													Margin="20 0 20 0">
+											<Button Style="{StaticResource MinimalistButtonStyle}"
+													Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithWinTermCommand}"
+													CommandParameter="{x:Bind}">
+												<StackPanel Orientation="Horizontal"
+															Spacing="8">
+													<FontIcon Glyph="&#xE756;" />
+													<TextBlock Text="Terminal"
+															   VerticalAlignment="Center"
+															   FontWeight="SemiBold"
+															   FontSize="12"/>
+												</StackPanel>
+											</Button>
+											<Button Style="{StaticResource MinimalistButtonStyle}"
+													Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithVsCodeCommand}"
+													CommandParameter="{x:Bind}">
+												<StackPanel Orientation="Horizontal"
+															Spacing="8">
+													<FontIcon Glyph="&#xE943;" />
+													<TextBlock Text="Visual Studio Code"
+															   VerticalAlignment="Center"
+															   FontWeight="SemiBold"
+															   FontSize="12"/>
+												</StackPanel>
+											</Button>
+											<Button Style="{StaticResource MinimalistButtonStyle}"
+													Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithFileExplorerCommand}"
+													CommandParameter="{x:Bind}">
+												<StackPanel Orientation="Horizontal"
+															Spacing="8">
+													<FontIcon Glyph="&#xEC50;" />
+													<TextBlock Text="Browse Files"
+															   VerticalAlignment="Center"
+															   FontWeight="SemiBold"
+															   FontSize="12"/>
+												</StackPanel>
+											</Button>
+											<Button Width="140"
+													Height="36"
+													Background="{ThemeResource DeleteButton}"
+													Foreground="White"
+													CornerRadius="6"
+													Command="{Binding ElementName=Page, Path=ViewModel.RemoveDistroCommand}"
+													CommandParameter="{x:Bind}">
+												<StackPanel Orientation="Horizontal"
+															Spacing="8"
+															HorizontalAlignment="Center">
+													<FontIcon Glyph="&#xE74D;"
+															  FontSize="12"/>
+													<TextBlock Text="Delete"
+															   FontSize="12"
+															   FontWeight="SemiBold"/>
+												</StackPanel>
+											</Button>
+										</StackPanel>
+									</Border>
 
-                                            <!-- Delete button aligné à droite -->
-                                            <Button Grid.Column="1"
-                                                    Width="100"
-                                                    Height="36"
-                                                    Background="#C85A5A"
-                                                    Foreground="White"
-                                                    CornerRadius="6"
-                                                    Command="{Binding ElementName=Page, Path=ViewModel.RemoveDistroCommand}"
-                                                    CommandParameter="{x:Bind}">
-                                                <StackPanel Orientation="Horizontal"
-                                                            Spacing="8"
-                                                            HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE74D;" />
-                                                    <TextBlock Text="Delete" />
-                                                </StackPanel>
-                                            </Button>
-                                        </Grid>
-                                    </Border>
-
-                                    <!-- Snapshot management area -->
-                                    <Border CornerRadius="8"
+									<!-- Snapshot management area -->
+									<Border Grid.Row="4" CornerRadius="8"
                                             Padding="20"
                                             Background="{ThemeResource LayerFillColorAltBrush}"
                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
-                                            BorderThickness="1"
-                                            Height="220">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
+                                            BorderThickness="1">
+										<Grid>
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="*" />
+												<ColumnDefinition Width="Auto" />
+											</Grid.ColumnDefinitions>
+											<!-- Add rows: title (Auto) and content (*) -->
+											<Grid.RowDefinitions>
+												<RowDefinition Height="Auto" />
+												<RowDefinition Height="*" />
+											</Grid.RowDefinitions>
 
-                                            <StackPanel>
-                                                <TextBlock Text="Snapshot Management"
-                                                           FontWeight="SemiBold"
-                                                           Margin="0,0,0,8" />
-                                                <StackPanel HorizontalAlignment="Center"
-                                                            VerticalAlignment="Center"
-                                                            Margin="0,24,0,0">
-                                                    <FontIcon Glyph="&#xE8B3;"
-                                                              FontSize="28"
-                                                              Foreground="{ThemeResource SystemColorGrayTextColor}"
-                                                              HorizontalAlignment="Center" />
-                                                    <TextBlock Text="No Snapshots Yet"
-                                                               FontWeight="SemiBold"
-                                                               Margin="0,12,0,0"
-                                                               HorizontalAlignment="Center" />
-                                                    <TextBlock Text="Create your first snapshot to save the current state of this distribution"
-                                                               FontSize="12"
-                                                               Foreground="{ThemeResource SystemColorGrayTextColor}"
-                                                               TextAlignment="Center"
-                                                               Margin="0,8,0,0" />
-                                                </StackPanel>
-                                            </StackPanel>
+											<!-- Always-visible title for snapshot area -->
+											<TextBlock Text="Snapshot Management"
+													  FontWeight="SemiBold"
+													  Margin="0,0,0,12"
+													  Grid.Column="0"
+													  Grid.ColumnSpan="2"
+													  Grid.Row="0"
+													  Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
-                                            <Button Grid.Column="1"
-                                                    Content="+ Create Snapshot"
-                                                    Width="140"
-                                                    Height="36"
+											<!-- Empty state (visible when there are no snapshots) -->
+											<StackPanel x:Name="SnapshotsEmptyStatePanel"
+														Grid.Column="0"
+														Grid.Row="1"
+														Visibility="Collapsed"
+														HorizontalAlignment="Center"
+														VerticalAlignment="Center">
+												<StackPanel HorizontalAlignment="Center"
+															VerticalAlignment="Center"
+															Margin="0,12,0,0">
+													<FontIcon Glyph="&#xE8B3;"
+															  FontSize="28"
+															  Foreground="{ThemeResource SystemColorGrayTextColor}"
+															  HorizontalAlignment="Center" />
+													<TextBlock Text="No Snapshots Yet"
+															   FontWeight="SemiBold"
+															   Margin="0,12,0,0"
+															   HorizontalAlignment="Center" />
+													<TextBlock Text="Create your first snapshot to save the current state of this distribution"
+															   FontSize="12"
+															   Foreground="{ThemeResource SystemColorGrayTextColor}"
+															   TextAlignment="Center"
+															   Margin="0,8,0,0" />
+												</StackPanel>
+											</StackPanel>
+
+											<!-- Snapshots list: bound to the Distribution.Snapshots collection -->
+											<ListView x:Name="SnapshotsListView"
+													  Grid.Column="0"
+													  Grid.Row="1"
+													  ItemsSource="{x:Bind Snapshots, Mode=OneWay}"
+													  Margin="0 0 12 0"
+													  HorizontalAlignment="Stretch"
+													  VerticalAlignment="Stretch"
+													  Visibility="Collapsed">
+												<ListView.ItemTemplate>
+													<DataTemplate x:DataType="model:Snapshot">
+														<Border CornerRadius="6"
+                                                                BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                                                BorderThickness="1"
+                                                                Padding="12"
+                                                                Margin="0 0 0 8"
+                                                                Background="Transparent">
+															<Grid>
+																<Grid.ColumnDefinitions>
+																	<ColumnDefinition Width="Auto" />
+																	<ColumnDefinition Width="*" />
+																	<ColumnDefinition Width="Auto" />
+																</Grid.ColumnDefinitions>
+																<!-- Snapshot icon -->
+																<Border Width="40"
+                                                                        Height="40"
+                                                                        CornerRadius="8"
+                                                                        Background="{ThemeResource SystemAccentColorDark2}"
+                                                                        BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                                                        BorderThickness="1"
+                                                                        VerticalAlignment="Center">
+																	<FontIcon Glyph="&#xE722;"
+                                                                              VerticalAlignment="Center"
+                                                                              HorizontalAlignment="Center"
+																			  FontSize="16"
+                                                                              Foreground="{ThemeResource SystemAccentColorLight1}" />
+																</Border>
+																<!-- Snapshot info -->
+																<StackPanel Grid.Column="1"
+                                                                            Margin="12,0,0,0"
+                                                                            VerticalAlignment="Center">
+																	<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+																		<TextBlock Text="{x:Bind Name}"
+                                                                                   FontWeight="SemiBold"
+                                                                                   FontSize="13"
+                                                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+																		<Border Padding="6,2"
+                                                                                Margin="8,0,0,0"
+                                                                                CornerRadius="2"
+                                                                                VerticalAlignment="Center"
+                                                                                BorderBrush="{ThemeResource SubtleBorderBrush}"
+                                                                                BorderThickness="1 1 1 1">
+																			<TextBlock Text="{x:Bind Path=system:String.Format('{0} GB', Size)}"
+                                                                                       FontSize="10"
+																					   FontWeight="SemiBold"
+                                                                                       Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}" />
+																		</Border>
+																	</StackPanel>
+																	<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,6,0,0">
+																		<FontIcon Glyph="&#xE787;" FontSize="12" Foreground="{ThemeResource SystemColorGrayTextColor}" Margin="0,0,6,0" />
+																		<TextBlock Text="{x:Bind CreationDate}"
+                                                                                   FontSize="12"
+                                                                                   Foreground="{ThemeResource SystemColorGrayTextColor}" />
+																	</StackPanel>
+																</StackPanel>
+																<!-- Actions -->
+																<StackPanel Grid.Column="2"
+                                                                            Orientation="Horizontal"
+                                                                            Spacing="8"
+                                                                            VerticalAlignment="Center"
+                                                                            HorizontalAlignment="Right">
+																	<Button Style="{StaticResource MinimalistButtonStyle}"
+                                                                            ToolTipService.ToolTip="Restore">
+																		<StackPanel Orientation="Horizontal" Spacing="8">
+																			<FontIcon Glyph="&#xE777;" FontSize="16"/>
+																			<TextBlock Text="Restore"
+                                                                                VerticalAlignment="Center"
+                                                                                FontSize="12"
+                                                                                FontWeight="SemiBold"/>
+																		</StackPanel>
+																	</Button>
+																	<Button Style="{StaticResource MinimalistButtonStyle}"
+                                                                            ToolTipService.ToolTip="Delete">
+																		<StackPanel Orientation="Horizontal"
+                                                                            Spacing="8">
+																			<FontIcon Glyph="&#xE74D;"
+                                                                                Foreground="{ThemeResource DeleteButton}"
+                                                                                FontSize="16"/>
+																		</StackPanel>
+																	</Button>
+																</StackPanel>
+															</Grid>
+														</Border>
+													</DataTemplate>
+												</ListView.ItemTemplate>
+											</ListView>
+											<Button Grid.Column="1"
+                                                    Grid.Row="0"
+                                                    Width="144"
+                                                    Height="28"
                                                     VerticalAlignment="Top"
-                                                    Background="{ThemeResource SystemControlHighlightAccentBrush}"
-                                                    Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                                                    CornerRadius="6"
+                                                    Background="{ThemeResource SystemAccentColorLight1}"
+                                                    Foreground="{ThemeResource SystemChromeMediumLowColor}"
+                                                    CornerRadius="4"
                                                     Command="{Binding ElementName=Page, Path=ViewModel.CreateSnapshotCommand}"
-                                                    CommandParameter="{x:Bind}" />
-                                        </Grid>
-                                    </Border>
+                                                    CommandParameter="{x:Bind}" >
+												<StackPanel Orientation="Horizontal" Spacing="8">
+													<FontIcon Glyph="&#xE710;"
+                                                              FontSize="10"
+                                                              FontWeight="Bold"/>
+													<TextBlock Text="Create Snapshot"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"/>
+												</StackPanel>
+											</Button>
 
-                                </StackPanel>
-                            </ScrollViewer>
-                        </DataTemplate>
 
-                    </ContentControl.Resources>
+										</Grid>
+									</Border>
 
-                    <ContentControl.ContentTemplateSelector>
-                        <templateSelector:DistributionTemplateSelector DefaultTemplate="{StaticResource DefaultContentTemplate}"
-                                                                       DistributionTemplate="{StaticResource DistributionTemplate}" />
-                    </ContentControl.ContentTemplateSelector>
-                </ContentControl>
-            </SplitView.Content>
-        </SplitView>
+								</Grid>
+							</ScrollViewer>
+						</DataTemplate>
 
-        <userControls:WslProcessInfoBar x:Name="WslProcessInfoBar"
-                                        Grid.Row="1" />
+					</ContentControl.Resources>
 
-    </Grid>
+					<ContentControl.ContentTemplateSelector>
+						<templateSelector:DistributionTemplateSelector DefaultTemplate="{StaticResource DefaultContentTemplate}"
+																	   DistributionTemplate="{StaticResource DistributionTemplate}" />
+					</ContentControl.ContentTemplateSelector>
+				</ContentControl>
+			</SplitView.Content>
+		</SplitView>
+
+		<userControls:WslProcessInfoBar x:Name="WslProcessInfoBar"
+										Grid.Row="1" />
+
+	</Grid>
 </Page>

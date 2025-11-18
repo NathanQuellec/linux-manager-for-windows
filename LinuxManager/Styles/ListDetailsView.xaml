@@ -19,7 +19,4 @@
                              Color="#1F000000" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
-
-    <SolidColorBrush x:Key="SubtleBorderBrush"
-                     Color="#1F000000" />
 </ResourceDictionary>
