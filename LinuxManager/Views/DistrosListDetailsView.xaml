@@ -325,7 +325,7 @@
                                             BorderBrush="{ThemeResource SubtleBorderBrush}"
                                             BorderThickness="1"
                                             VerticalAlignment="Center">
-                                        <FontIcon Glyph="&#xE7FD;"
+                                        <FontIcon Glyph="&#xE770;"
                                                   VerticalAlignment="Center"
                                                   HorizontalAlignment="Center" />
                                     </Border>
