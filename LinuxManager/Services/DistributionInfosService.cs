@@ -1,221 +1,224 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
-using Serilog;
 using LinuxManager.Contracts.Services;
 using LinuxManager.Helpers;
+using LinuxManager.Models;
+using Serilog;
 
 namespace LinuxManager.Services;
 
-/** <summary>
- * Fetch informations about distributions (os, users, ...)
- * </summary>
- */
+/// <summary>
+/// Provides runtime information about distributions (OS metadata, users, disk usage, etc.).
+/// </summary>
 public class DistributionInfosService : IDistributionInfosService
 {
     private const string WSL_UNC_PATH = @"\\wsl$";
 
-    /*  To get distributions infos, we try at first to read the image "ext4.vhdx" and open the file /etc/os-release.
-        If we cannot read ext4.dhdx, that means the distribution is runningand we can get os-release file from the 
-        file system located at \\wsl$\distroname\...
-    */
+    /// <summary>
+    /// Retrieve a field value (e.g. NAME / VERSION) from the distribution's os-release file.
+    /// Strategy:
+    /// 1. Try /etc/os-release via ext4.vhdx.
+    /// 2. Fallback to /usr/lib/os-release if missing.
+    /// 3. If ext4.vhdx locked (running), read live UNC path.
+    /// </summary>
     public string GetOsInfos(string distroName, string distroPath, string field)
     {
-        Log.Information($"Fetching OS information of distribution {distroName} ...");
+        Log.Information($"Fetching OS information for {distroName}");
 
-        var osInfosPattern = $@"(\b{field}="")(.*?)""";
-        var osInfosFile = Path.Combine("etc", "os-release");
-        var osInfosFileFallBack = Path.Combine("usr", "lib", "os-release");
-        string osInfos;
+        var osInfosPattern = $@"(\b{field}=\"")(.*?)\"""; // capture value between quotes after FIELD="..."
+        var osReleasePrimary = Path.Combine("etc", "os-release");
+        var osReleaseFallback = Path.Combine("usr", "lib", "os-release");
+        string value;
 
         try
         {
-            osInfos = GetOsInfosFromVhdx(distroPath, osInfosFile, osInfosPattern);
+            value = GetOsInfosFromVhdx(distroPath, osReleasePrimary, osInfosPattern);
         }
         catch (FileNotFoundException ex)
         {
-            // fallback following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
-
-            Log.Error($"Didn't find /etc/os-release, retry with fallback file - Caused by exception : {ex}");
-            osInfos = GetOsInfosFromVhdx(distroPath, osInfosFileFallBack, osInfosPattern);
+            Log.Warning($"/etc/os-release not found; using fallback for {distroName}: {ex.Message}");
+            value = GetOsInfosFromVhdx(distroPath, osReleaseFallback, osInfosPattern);
         }
         catch (IOException ex)
         {
-            /*  if we cannot read ext4.dhdx, that means the distribution is running
-                and we can get os-release file from the file system located at \\wsl$\distroname\...
-             */
-
-            Log.Error($"Another process is already reading ext4.vhdx - Caused by exception : {ex}");
-            osInfos = GetOsInfosFromFileSystem(distroName, osInfosPattern);
+            Log.Warning($"ext4.vhdx locked; reading live FS for {distroName}: {ex.Message}");
+            value = GetOsInfosFromFileSystem(distroName, osInfosPattern);
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed fetch OS information - Caused by exception {ex}");
-            osInfos = "Unknown";
+            Log.Error($"Error fetching OS info for {distroName}: {ex}");
+            value = "Unknown";
         }
 
-        return string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos;
+        return string.IsNullOrEmpty(value) ? "Unknown" : value;
     }
 
-    private static string GetOsInfosFromVhdx(string distroPath, string osInfosFilePath, string osInfosPattern)
+    /// <summary>Get disk usage information by invoking df inside the distribution.</summary>
+    public DiskUsageInfo GetDistributionDiskUsageInfo(string distroName)
     {
-        Log.Information($"Fetching OS information from WSL vhdx image ...");
-
-        var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
-
+        Log.Information($"Fetching disk usage for {distroName}");
         try
         {
+            var process = new ProcessBuilder("powershell.exe")
+                .SetArguments($"/c wsl.exe --system -d {distroName} df -B1 /mnt/wslg/distro")
+                .SetCreateNoWindow(true)
+                .SetUseShellExecute(false)
+                .SetRedirectStandardOutput(true)
+                .SetRedirectStandardError(true)
+                .Build();
+            process.Start();
 
-            var wslImageHelper = new WslImageHelper(wslImagePath);
-            var fileContent = wslImageHelper.ReadFile(osInfosFilePath);
-            var osInfos = Regex.Match(fileContent, osInfosPattern)
-                .Groups[2].Value;
+            var output = process.StandardOutput.ReadToEnd();
+            var errorOutput = process.StandardError.ReadToEnd();
 
-            return osInfos;
-        }
-        catch (FileNotFoundException ex)
-        {
-            Log.Error($"Didn't find /usr/lib/os-release - Caused by exception : {ex}");
-            throw;
-        }
-        catch (IOException ex)
-        {
-            Log.Error($"Another process is already reading ext4.vhdx - Caused by exception : {ex}");
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed fetch OS information from WSL vhdx image - Caused by exception {ex}");
-            throw;
-        }
-    }
-
-    private static string GetOsInfosFromFileSystem(string distroName, string osInfosPattern)
-    {
-        Log.Information($"Fetching OS information from os-release file of {distroName} FS ...");
-
-        var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
-
-        try
-        {
-            var osInfosFile = new FileInfo(osInfosFilePath);
-            if (osInfosFile.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            if (!string.IsNullOrEmpty(errorOutput))
             {
-                // we cannot read a symlink, so we use the fallback os-release file located at /usr/lib/os-release
-                Log.Warning("/etc/os-release is a symbolic link to /usr/lib/os-release");
-                osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
+                Log.Error($"Error fetching disk usage for {distroName}: {errorOutput}");
+                return new DiskUsageInfo();
             }
-
-            // using var streamReader = new StreamReader(osInfosFilePath);
-            var content = File.ReadAllText(osInfosFilePath);
-            var osInfos = Regex.Match(content, osInfosPattern).Groups[2].Value;
-
-            return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
+            return ParseDiskUsageOutput(output);
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to fetch os infos from os-release file - Caused by exception : {ex} ");
+            Log.Error($"Failed to fetch disk usage for {distroName}: {ex}");
+            return new DiskUsageInfo();
+        }
+    }
+
+    private static DiskUsageInfo ParseDiskUsageOutput(string output)
+    {
+        var info = new DiskUsageInfo();
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            Log.Warning("Disk usage output empty");
+            return info;
+        }
+        try
+        {
+            var lines = output.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length < 2)
+            {
+                Log.Warning("Disk usage output has fewer than 2 lines");
+                return info;
+            }
+            var dataLine = lines[1].Trim();
+            var parts = dataLine.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 6)
+            {
+                Log.Warning($"Unexpected disk usage format: {dataLine}");
+                return info;
+            }
+            info.Size = UnitHelper.ParseBytesToGigaBytesStr(long.Parse(parts[1]));
+            info.Used = UnitHelper.ParseBytesToGigaBytesStr(long.Parse(parts[2]));
+            info.Available = UnitHelper.ParseBytesToGigaBytesStr(long.Parse(parts[3]));
+            info.UsePercentage = UnitHelper.CalculateAndParsePercentage(info.Used, info.Size);
+            Log.Information($"Parsed disk usage: Size={info.Size}, Used={info.Used}, Avail={info.Available}, Percent={info.UsePercentage}");
+            return info;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed parsing disk usage output: {ex}");
+            return info;
+        }
+    }
+
+    private static string GetOsInfosFromVhdx(string distroPath, string osReleaseFile, string pattern)
+    {
+        Log.Information("Reading os-release from ext4.vhdx");
+        var vhdxPath = Path.Combine(distroPath, "ext4.vhdx");
+        try
+        {
+            var helper = new WslImageHelper(vhdxPath);
+            var fileContent = helper.ReadFile(osReleaseFile);
+            return Regex.Match(fileContent, pattern).Groups[2].Value;
+        }
+        catch (FileNotFoundException) { throw; }
+        catch (IOException) { throw; }
+        catch (Exception ex)
+        {
+            Log.Error($"Error reading os-release: {ex}");
+            throw;
+        }
+    }
+
+    private static string GetOsInfosFromFileSystem(string distroName, string pattern)
+    {
+        Log.Information("Reading os-release from live FS");
+        var osReleasePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
+        try
+        {
+            if (File.Exists(osReleasePath) && new FileInfo(osReleasePath).Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                Log.Warning("/etc/os-release is a symlink; using fallback file");
+                osReleasePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
+            }
+            var content = File.ReadAllText(osReleasePath);
+            var value = Regex.Match(content, pattern).Groups[2].Value;
+            return string.IsNullOrEmpty(value) ? "Unknown" : value;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed reading live os-release: {ex}");
             return "Unknown";
         }
     }
 
-    public string GetSize(string distroPath)
-    {
-        Log.Information("Getting distribution size from wsl vhdx image ...");
-
-        try
-        {
-            var diskLocation = Path.Combine(distroPath, "ext4.vhdx");
-            var diskFile = new FileInfo(diskLocation);
-            var sizeInGB = (decimal)diskFile.Length / 1024 / 1024 / 1024;
-
-            return Math.Round(sizeInGB, 2).ToString(CultureInfo.InvariantCulture);
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed to get distribution size from wsl vhdx image - Caused by exception : {ex} ");
-            return "0";
-        }
-    }
-
+    /// <summary>Get user list from /etc/passwd via vhdx or live FS fallback.</summary>
     public List<string> GetDistributionUsers(string distroName, string distroPath)
     {
-        Log.Information("Getting distribution's users list ...");
-
-        const string userShellPattern = @"/bin/(.*?)sh$";
-        var usersList = new List<string>();
-
-        try
-        {
-            usersList = GetUsersFromExt4(distroPath, userShellPattern);
-
-        }
+        Log.Information($"Fetching users for {distroName}");
+        const string shellPattern = @"/bin/(.*?)sh$";
+        try { return GetUsersFromExt4(distroPath, shellPattern); }
         catch (IOException ex)
         {
-            Log.Error($"Failed to get distro users from ext4.vhdx image file - Caused by exception : {ex}");
-            usersList = GetUsersFromFileSystem(distroName, userShellPattern);
+            Log.Warning($"ext4.vhdx locked; reading live FS users for {distroName}: {ex.Message}");
+            return GetUsersFromFileSystem(distroName, shellPattern);
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to get distro users from file system - Caused by exception : {ex}");
-            usersList.Add("Unknown");
-        }
-
-        return usersList;
-    }
-
-    private static List<string> GetUsersFromExt4(string distroPath, string userShellPattern)
-    {
-        Log.Information("Getting distribution's users list from wsl vhdx image ...");
-
-        var passwdFilePath = Path.Combine("etc", "passwd");
-        var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
-
-        try
-        {
-            var wslImageHelper = new WslImageHelper(wslImagePath);
-            var fileContent = wslImageHelper.ReadFile(passwdFilePath);
-            var lines = fileContent.Split('\n');
-
-            var users = lines
-                .Where(line => Regex.Match(line, userShellPattern).Success)
-                .Select(line => line.Split(':')[0])
-                .ToList();
-
-            return users;
-        }
-        catch (IOException ex)
-        {
-            Log.Error($"Cannot read ext4.vhdx image file - Caused by exception : {ex}");
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Cannot get list of users from /etc/passwd file - Caused by exception : {ex}");
-            return new List<string>() { "Unknown" };
+            Log.Error($"Failed to obtain users for {distroName}: {ex}");
+            return new List<string> { "Unknown" };
         }
     }
 
-    private static List<string> GetUsersFromFileSystem(string distroName, string userShellPattern)
+    private static List<string> GetUsersFromExt4(string distroPath, string pattern)
     {
-        Log.Information("Getting distribution's users list from distro FS ...");
-
-        var passwdFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "passwd");
-
+        Log.Information("Reading /etc/passwd from ext4.vhdx");
+        var passwdPath = Path.Combine("etc", "passwd");
+        var vhdxPath = Path.Combine(distroPath, "ext4.vhdx");
         try
         {
-            using var streamReader = new StreamReader(passwdFilePath);
-            var users = streamReader.ReadToEnd()
-                .Split("\n")
-                .Where(line => Regex.Match(line, userShellPattern).Success)
+            var helper = new WslImageHelper(vhdxPath);
+            var content = helper.ReadFile(passwdPath);
+            return content.Split('\n')
+                .Where(line => Regex.IsMatch(line, pattern))
                 .Select(line => line.Split(':')[0])
                 .ToList();
+        }
+        catch (IOException) { throw; }
+        catch (Exception ex)
+        {
+            Log.Error($"Error parsing passwd from image: {ex}");
+            return new List<string> { "Unknown" };
+        }
+    }
 
-            return users;
+    private static List<string> GetUsersFromFileSystem(string distroName, string pattern)
+    {
+        Log.Information("Reading /etc/passwd from live FS");
+        var passwdPath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "passwd");
+        try
+        {
+            var content = File.ReadAllText(passwdPath);
+            return content.Split('\n')
+                .Where(line => Regex.IsMatch(line, pattern))
+                .Select(line => line.Split(':')[0])
+                .ToList();
         }
         catch (Exception ex)
         {
-            Log.Error($"Cannot get list of users from /etc/passwd file : {ex}");
-            return new List<string>() { "Unknown" };
+            Log.Error($"Error parsing passwd from live FS: {ex}");
+            return new List<string> { "Unknown" };
         }
     }
 }

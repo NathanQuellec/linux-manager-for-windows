@@ -48,9 +48,9 @@ public class DistributionBuilder
         return this;
     }
 
-    public DistributionBuilder WithSize(string size)
+    public DistributionBuilder WithDiskUsageInfo(DiskUsageInfo diskUsageInfo)
     {
-        _distribution.Size = size;
+        _distribution.DiskUsageInfo = diskUsageInfo;
         return this;
     }
 

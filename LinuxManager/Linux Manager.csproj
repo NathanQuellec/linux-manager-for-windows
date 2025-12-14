@@ -40,6 +40,7 @@
     <Content Remove="Assets\StoreLogo.scale-150.png" />
     <Content Remove="Assets\vscode-alt.png" />
     <Content Remove="Assets\vscode-alt.svg" />
+    <Content Remove="Assets\WslLogo.ico" />
     <Content Remove="Assets\WslStudio.png" />
     <Content Remove="Assets\LinuxManagerIcon.altform-lightunplated_targetsize-16.png" />
     <Content Remove="Assets\LinuxManagerIcon.altform-lightunplated_targetsize-24.png" />

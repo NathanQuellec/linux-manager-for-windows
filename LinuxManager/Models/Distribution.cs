@@ -19,7 +19,7 @@ public class Distribution : INotifyPropertyChanged, IBaseModel
 
     public string OsVersion { get; set; }
 
-    public string Size { get; set; }
+    public DiskUsageInfo DiskUsageInfo { get; set;}
 
     public IList<string> Users { get; set; } = new List<string>();
 

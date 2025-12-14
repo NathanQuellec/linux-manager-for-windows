@@ -61,9 +61,12 @@ public class SnapshotService : ISnapshotService
                 snapshotType = SnapshotType.Archive;
                 await WslHelper.ExportDistribution(distribution.Name, snapshotPath);
             }
-
-            decimal sizeOfSnap = await CompressSnapshot(snapshotPath);
+            await CompressSnapshot(snapshotPath);
             snapshotPath += ".gz"; // adding .gz extension file after successfully completed the compression
+            var snapshotFile = new FileInfo(snapshotPath);
+
+            var sizeOfSnapshot = UnitHelper.BytesToGigaBytesStr(snapshotFile.Length);
+            var sizeOfSnapshotStr = UnitHelper.ParseBytesToGigaBytesStr(snapshotFile.Length);
 
             var snapshot = new Snapshot()
             {
@@ -72,15 +75,15 @@ public class SnapshotService : ISnapshotService
                 Description = snapshotDescr,
                 Type = snapshotType.ToString(),
                 CreationDate = currentDateTime,
-                Size = sizeOfSnap.ToString(CultureInfo.InvariantCulture),
-                DistroSize = distribution.Size,
+                Size = sizeOfSnapshotStr,
+                DistroSize = distribution.DiskUsageInfo.Used,
                 Path = snapshotPath,
             };
 
             distribution.Snapshots.Insert(0, snapshot);
 
-            var currentTotalSnapSize = decimal.Parse(distribution.SnapshotsTotalSize, CultureInfo.InvariantCulture);
-            distribution.SnapshotsTotalSize = (currentTotalSnapSize + sizeOfSnap)
+            var currentTotalSnapSize = double.Parse(distribution.SnapshotsTotalSize, CultureInfo.InvariantCulture);
+            distribution.SnapshotsTotalSize = (currentTotalSnapSize + sizeOfSnapshot)
                 .ToString(CultureInfo.InvariantCulture);
 
             await SaveDistroSnapshotInfos(snapshot, snapshotFolder);
@@ -103,7 +106,7 @@ public class SnapshotService : ISnapshotService
         }
     }
 
-    private static async Task<decimal> CompressSnapshot(string snapshotPath)
+    private static async Task CompressSnapshot(string snapshotPath)
     {
         Log.Information($"Compressing snapshot from .tar to .tar.gz in location {snapshotPath}");
         WeakReferenceMessenger.Default.Send(new SnapshotProgressBarMessage("Compressing snapshot ..."));
@@ -111,15 +114,12 @@ public class SnapshotService : ISnapshotService
         {
             var compressedFilePath = snapshotPath + ".gz";
 
-            await using Stream s = new GZipOutputStream(File.Create(compressedFilePath));
-            await using var fs = File.OpenRead(snapshotPath);
-            await fs.CopyToAsync(s, 4096, CancellationToken.None);
-            fs.Close();
+            await using Stream stream = new GZipOutputStream(File.Create(compressedFilePath));
+            await using var fileStream = File.OpenRead(snapshotPath);
+            await fileStream.CopyToAsync(stream, 4096, CancellationToken.None);
+            fileStream.Close();
 
             File.Delete(snapshotPath);
-            var sizeInGB = (decimal)s.Length / 1024 / 1024 / 1024;
-
-            return Math.Round(sizeInGB, 2);
         }
         catch (Exception ex)
         {

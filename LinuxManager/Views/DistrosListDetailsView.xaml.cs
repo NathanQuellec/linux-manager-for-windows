@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
-
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -11,21 +10,16 @@ using LinuxManager.Helpers;
 using LinuxManager.Messages;
 using LinuxManager.ViewModels;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace LinuxManager.Views;
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class DistrosListDetailsView : Page
 {
     private Button _distroStopButton = new();
+    private Button _distroStartButton = new();
 
-    public DistrosListDetailsVM ViewModel
-    {
-        get;
-    }
+    private StackPanel _distroRunningStatusPanel = new();
+    private StackPanel _distroStoppedStatusPanel = new();
+
+    public DistrosListDetailsVM ViewModel { get; }
 
     public DistrosListDetailsView()
     {
@@ -39,25 +33,24 @@ public sealed partial class DistrosListDetailsView : Page
         {
             Log.Information("[PUB/SUB] Message received to show distribution 'stop' button");
             var distro = message.Distribution;
-            FindDistroStopButton(this, distro.Name);
-            if (_distroStopButton != null)
-            {
-                _distroStopButton.Visibility = Visibility.Visible;
-            }
+            ResolveDistroControls(distro.Name);
+            _distroStartButton.Visibility = Visibility.Collapsed;
+            _distroStopButton.Visibility = Visibility.Visible;
+            _distroRunningStatusPanel.Visibility = Visibility.Visible;
+            _distroStoppedStatusPanel.Visibility = Visibility.Collapsed;
         });
 
         WeakReferenceMessenger.Default.Register<HideDistroStopButtonMessage>(this, (recipient, message) =>
         {
             Log.Information("[PUB/SUB] Message received to hide distribution 'stop' button");
             var distro = message.Distribution;
-            FindDistroStopButton(this, distro.Name);
-            if (_distroStopButton != null)
-            {
-                _distroStopButton.Visibility = Visibility.Collapsed;
-            }
+            ResolveDistroControls(distro.Name);
+            _distroStopButton.Visibility = Visibility.Collapsed;
+            _distroStartButton.Visibility = Visibility.Visible;
+            _distroRunningStatusPanel.Visibility = Visibility.Collapsed;
+            _distroStoppedStatusPanel.Visibility = Visibility.Visible;
         });
 
-        //Close InfoBar after timer set in DistroListDetailsViewModel.cs
         WeakReferenceMessenger.Default.Register<CloseInfoBarMessage>(this, (recipient, message) =>
         {
             Log.Information("[PUB/SUB] Message received to close infobar");
@@ -66,20 +59,47 @@ public sealed partial class DistrosListDetailsView : Page
         });
     }
 
-    /*
-     * We need to go through the Visual Tree recursively to find the Tag that matches the Distro Name received,
-     * as we cannot set a dynamic x:Name property for the Stop button.
-     */
-    private void FindDistroStopButton(DependencyObject parent, string searchDistroName)
+    private void ResolveDistroControls(string distroName)
     {
-        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        var resolvers = new Dictionary<string, Action<FrameworkElement>>
         {
-            var currentChild = VisualTreeHelper.GetChild(parent, i);
-            if (currentChild != null && currentChild is Button btn && (string)btn.Tag == $"Stop_{searchDistroName}")
+            [$"STOP_{distroName}"] = fe => _distroStopButton = (Button)fe,
+            [$"START_{distroName}"] = fe => _distroStartButton = (Button)fe,
+            [$"RUNNING_{distroName}"] = fe => _distroRunningStatusPanel = (StackPanel)fe,
+            [$"STOPPED_{distroName}"] = fe => _distroStoppedStatusPanel = (StackPanel)fe
+        };
+
+        TraverseVisualTree(this, resolvers);
+    }
+
+    private static void TraverseVisualTree(DependencyObject root, IDictionary<string, Action<FrameworkElement>> resolvers)
+    {
+        if (resolvers.Count == 0)
+        {
+            return;
+        }
+
+        var stack = new Stack<DependencyObject>();
+        stack.Push(root);
+
+        while (stack.Count > 0 && resolvers.Count > 0)
+        {
+            var current = stack.Pop();
+            var childCount = VisualTreeHelper.GetChildrenCount(current);
+            for (var i = 0; i < childCount; i++)
             {
-                _distroStopButton = btn;
+                var child = VisualTreeHelper.GetChild(current, i);
+                if (child is FrameworkElement { Tag: string tag } fe && resolvers.TryGetValue(tag, out var apply))
+                {
+                    apply(fe);
+                    resolvers.Remove(tag);
+                    if (resolvers.Count == 0)
+                    {
+                        return; // all found
+                    }
+                }
+                stack.Push(child);
             }
-            FindDistroStopButton(currentChild, searchDistroName);
         }
     }
 }
