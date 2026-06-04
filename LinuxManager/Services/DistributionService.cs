@@ -143,7 +143,12 @@ public class DistributionService : IDistributionService
 
     private static void RemoveDistributionFolder(Distribution distribution)
     {
-        var distroPath = Directory.GetParent(distribution.Path).FullName;
+        var distroPath = distribution.Path;
+        if (!distroPath.StartsWith(App.DistroDirPath, StringComparison.OrdinalIgnoreCase))
+        {
+            Log.Warning($"Skipping folder deletion for {distribution.Name}: path is outside managed directory.");
+            return;
+        }
         if (Directory.Exists(distroPath))
         {
             Directory.Delete(distroPath, true);
