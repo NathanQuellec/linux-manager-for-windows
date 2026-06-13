@@ -192,7 +192,7 @@ public class DistributionService : IDistributionService
             lxsSubKeys.Close();
             return false;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Log.Error("Failed to rename distribution in registry");
             return false;

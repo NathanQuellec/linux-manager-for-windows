@@ -2,8 +2,11 @@
 
 namespace LinuxManager.Helpers;
 
-// TODO : Add comment 
-
+/// <summary>
+/// Fluent builder around <see cref="Process"/>/<see cref="ProcessStartInfo"/>.
+/// Used by <see cref="ProcessFactory"/> to assemble the flags for each
+/// <see cref="ProcessType"/>; prefer the factory over instantiating this directly.
+/// </summary>
 public class ProcessBuilder
 {
     private readonly Process _process = new();
