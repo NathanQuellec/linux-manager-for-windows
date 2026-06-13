@@ -8,7 +8,7 @@ namespace LinuxManager;
  * This class makes Linux Manager single-instanced.
  * For more details : https://blogs.windows.com/windowsdeveloper/2022/01/28/making-the-app-single-instanced-part-3/
  */
-public class Program
+public static class Program
 {
     [STAThread]
     static async Task<int> Main(string[] args)
@@ -33,7 +33,6 @@ public class Program
     {
         bool isRedirect = false;
         AppActivationArguments args = AppInstance.GetCurrent().GetActivatedEventArgs();
-        ExtendedActivationKind kind = args.Kind;
         AppInstance keyInstance = AppInstance.FindOrRegisterForKey("randomKey");
 
         if (keyInstance.IsCurrent)
@@ -50,6 +49,6 @@ public class Program
 
     private static void OnActivated(object sender, AppActivationArguments args)
     {
-        ExtendedActivationKind kind = args.Kind;
+        // No redirection handling required for subsequent activations.
     }
 }

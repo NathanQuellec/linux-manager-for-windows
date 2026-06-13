@@ -33,7 +33,7 @@ public static class FilesHelper
         {
             Directory.Delete(dirPath);
         }
-        catch (DirectoryNotFoundException ex)
+        catch (DirectoryNotFoundException)
         {
             Log.Error($"Cannot failed directory to remove at {dirPath}");
         }
