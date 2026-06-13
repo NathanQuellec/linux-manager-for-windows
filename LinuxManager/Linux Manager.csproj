@@ -62,21 +62,6 @@
     <Content Remove="Assets\LinuxManagerIcon.targetsize-256.png" />
     <Content Remove="Assets\LinuxManagerIcon.targetsize-32.png" />
     <Content Remove="Assets\LinuxManagerIcon.targetsize-48.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-lightunplated_targetsize-16.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-lightunplated_targetsize-24.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-lightunplated_targetsize-256.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-lightunplated_targetsize-32.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-lightunplated_targetsize-48.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-unplated_targetsize-16.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-unplated_targetsize-24.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-unplated_targetsize-256.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-unplated_targetsize-32.png" />
-    <Content Remove="Assets\LinuxManagerLogo.altform-unplated_targetsize-48.png" />
-    <Content Remove="Assets\LinuxManagerLogo.targetsize-16.png" />
-    <Content Remove="Assets\LinuxManagerLogo.targetsize-24.png" />
-    <Content Remove="Assets\LinuxManagerLogo.targetsize-256.png" />
-    <Content Remove="Assets\LinuxManagerLogo.targetsize-32.png" />
-    <Content Remove="Assets\LinuxManagerLogo.targetsize-48.png" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\LargeTile.scale-100.png" />
