@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master", "release/**" ]
+  pull_request:
+    branches: [ "master", "release/**" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & Test (${{ matrix.configuration }} | ${{ matrix.platform }})
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [ Release ]
+        platform: [ x64 ]
+
+    env:
+      SOLUTION: LinuxManager.sln
+      TEST_PROJECT: LinuxManager.Tests/LinuxManager.Tests.csproj
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore $env:SOLUTION
+
+      - name: Build
+        run: dotnet build $env:SOLUTION -c ${{ matrix.configuration }} -p:Platform=${{ matrix.platform }} --no-restore
+
+      - name: Test
+        run: >
+          dotnet test $env:TEST_PROJECT
+          -c ${{ matrix.configuration }}
+          -p:Platform=${{ matrix.platform }}
+          --no-restore
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory ${{ github.workspace }}/TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.configuration }}-${{ matrix.platform }}
+          path: ${{ github.workspace }}/TestResults/*.trx
+          if-no-files-found: ignore
