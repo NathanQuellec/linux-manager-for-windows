@@ -86,9 +86,7 @@ public sealed partial class DisplaySnapshotsView : UserControl
         Log.Information("Opening snapshots folder ...");
         try
         {
-            var process = new ProcessBuilder("explorer.exe")
-                .SetArguments(snapshotsFolderPath)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.Default, "explorer.exe", snapshotsFolderPath);
             process.Start();
         }
         catch (Exception ex)

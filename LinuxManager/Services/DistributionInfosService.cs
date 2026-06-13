@@ -59,13 +59,8 @@ public class DistributionInfosService : IDistributionInfosService
         Log.Information($"Fetching disk usage for {distroName}");
         try
         {
-            var process = new ProcessBuilder("powershell.exe")
-                .SetArguments($"/c wsl.exe --system -d {distroName} df -B1 /mnt/wslg/distro")
-                .SetCreateNoWindow(true)
-                .SetUseShellExecute(false)
-                .SetRedirectStandardOutput(true)
-                .SetRedirectStandardError(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.ReadOutputAndError, "powershell.exe",
+                $"/c wsl.exe --system -d {distroName} df -B1 /mnt/wslg/distro");
             process.Start();
 
             var output = process.StandardOutput.ReadToEnd();

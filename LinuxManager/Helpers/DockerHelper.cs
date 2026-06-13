@@ -19,7 +19,6 @@ public class DockerHelper
 
     private const string DOCKER_NAMED_PIPE = "npipe://./pipe/docker_engine";
     private const string DOCKER_REGISTRY = "https://registry.hub.docker.com/v2";
-    // private static readonly string DockerAuthToken = "auth.docker.io";
 
     public DockerHelper()
     {

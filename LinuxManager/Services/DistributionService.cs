@@ -126,10 +126,8 @@ public class DistributionService : IDistributionService
 
     public async Task RemoveDistribution(Distribution distribution)
     {
-        var process = new ProcessBuilder("cmd.exe")
-            .SetArguments($"/c wsl --unregister {distribution.Name}")
-            .SetCreateNoWindow(true)
-            .Build();
+        var process = ProcessFactory.Create(ProcessType.Background, "cmd.exe",
+            $"/c wsl --unregister {distribution.Name}");
         process.Start();
         await process.WaitForExitAsync();
 
@@ -192,7 +190,7 @@ public class DistributionService : IDistributionService
             lxsSubKeys.Close();
             return false;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Log.Error("Failed to rename distribution in registry");
             return false;
@@ -227,12 +225,8 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments($"/c wsl ~ -d {distribution?.Name}")
-                .SetRedirectStandardOutput(false)
-                .SetUseShellExecute(true)
-                .SetCreateNoWindow(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.Interactive, "cmd.exe",
+                $"/c wsl ~ -d {distribution?.Name}");
             process.Start();
             Log.Information($"Launch process started (PID={process.Id}) for {distribution.Name}");
             distribution?.RunningProcesses.Add(process);
@@ -249,11 +243,8 @@ public class DistributionService : IDistributionService
         Log.Information($"Background start for {distribution.Name}");
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments($"/c wsl -d {distribution?.Name}")
-                .SetCreateNoWindow(true)
-                .SetUseShellExecute(false)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.Background, "cmd.exe",
+                $"/c wsl -d {distribution?.Name}");
             process.Start();
         }
         catch (Exception ex)
@@ -296,10 +287,8 @@ public class DistributionService : IDistributionService
             {
                 BackgroundLaunchDistribution(distribution);
             }
-            var processBuilder = new ProcessBuilder("explorer.exe")
-                .SetArguments(distroFileSystem)
-                .Build();
-            processBuilder.Start();
+            var process = ProcessFactory.Create(ProcessType.Default, "explorer.exe", distroFileSystem);
+            process.Start();
         }
         catch (Exception ex)
         {
@@ -309,9 +298,8 @@ public class DistributionService : IDistributionService
 
     public void OpenDistributionWithVsCode(Distribution distribution)
     {
-        var process = new ProcessBuilder("cmd.exe")
-            .SetArguments($"/c wsl ~ -d {distribution.Name} code .")
-            .Build();
+        var process = ProcessFactory.Create(ProcessType.Default, "cmd.exe",
+            $"/c wsl ~ -d {distribution.Name} code .");
         process.Start();
     }
 
@@ -319,12 +307,8 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments($"/c wt wsl ~ -d {distribution?.Name}")
-                .SetRedirectStandardOutput(false)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.Background, "cmd.exe",
+                $"/c wt wsl ~ -d {distribution?.Name}");
             process.Start();
             Log.Information($"Windows Terminal started (PID={process.Id}) for {distribution.Name}");
         }
@@ -348,10 +332,8 @@ public class DistributionService : IDistributionService
                 Log.Warning($"Installation location not found for {distribution.Name}: {target}");
                 return;
             }
-            var processBuilder = new ProcessBuilder("explorer.exe")
-                .SetArguments(target)
-                .Build();
-            processBuilder.Start();
+            var process = ProcessFactory.Create(ProcessType.Default, "explorer.exe", target);
+            process.Start();
             Log.Information($"Opening installation location: {target}");
         }
         catch (Exception ex)
