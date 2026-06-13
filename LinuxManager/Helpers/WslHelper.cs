@@ -18,14 +18,8 @@ public static class WslHelper
 
     public static bool CheckHypervisor()
     {
-        var process = new ProcessBuilder("powershell.exe")
-            .SetArguments(
-                "/c (Get-WmiObject -Class \"Win32_ComputerSystem\" -ComputerName \"localhost\").HypervisorPresent")
-            .SetUseShellExecute(false)
-            .SetRedirectStandardOutput(true)
-            .SetRedirectStandardError(true)
-            .SetCreateNoWindow(true)
-            .Build();
+        var process = ProcessFactory.Create(ProcessType.ReadOutputAndError, "powershell.exe",
+            "/c (Get-WmiObject -Class \"Win32_ComputerSystem\" -ComputerName \"localhost\").HypervisorPresent");
         process.Start();
 
         var output = process.StandardOutput.ReadToEnd();
@@ -39,14 +33,8 @@ public static class WslHelper
 
     public static async Task<bool> CheckWslMicrosoftStore()
     {
-        var process = new ProcessBuilder("powershell.exe")
-            .SetArguments(
-                "/c  winget ls  -q 'WindowsSubsystemForLinux'")
-            .SetUseShellExecute(false)
-            .SetRedirectStandardOutput(true)
-            .SetRedirectStandardError(true)
-            .SetCreateNoWindow(true)
-            .Build();
+        var process = ProcessFactory.Create(ProcessType.ReadOutputAndError, "powershell.exe",
+            "/c  winget ls  -q 'WindowsSubsystemForLinux'");
         process.Start();
         var output = await process.StandardOutput.ReadToEndAsync();
 
@@ -55,12 +43,8 @@ public static class WslHelper
 
     public static async void InstallWslFromMicrosoftStore()
     {
-        var process = new ProcessBuilder("powershell.exe")
-            .SetArguments(
-                "/c  winget install 'Windows Subsystem for Linux'")
-            .SetUseShellExecute(true)
-            .SetVerb("runas")
-            .Build();
+        var process = ProcessFactory.Create(ProcessType.Elevated, "powershell.exe",
+            "/c  winget install 'Windows Subsystem for Linux'");
         process.Start();
         await process.WaitForExitAsync();
     }
@@ -70,13 +54,8 @@ public static class WslHelper
      */
     public static async Task ExportDistribution(string distroName, string destPath)
     {
-        var process = new ProcessBuilder("cmd.exe")
-            .SetArguments(
-                $"/c wsl --export {distroName} {destPath}")
-            .SetRedirectStandardOutput(true)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
+        var process = ProcessFactory.Create(ProcessType.ReadOutput, "cmd.exe",
+            $"/c wsl --export {distroName} {destPath}");
         process.Start();
 
         await process.WaitForExitAsync();
@@ -89,13 +68,8 @@ public static class WslHelper
         WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Importing your distribution ..."));
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments($"/c md {installDir} & wsl --import {distroName} {installDir} {tarLocation}")
-                .SetRedirectStandardOutput(true)
-                .SetRedirectStandardError(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.ReadOutputAndError, "cmd.exe",
+                $"/c md {installDir} & wsl --import {distroName} {installDir} {tarLocation}");
 
             process.Start();
             await process.WaitForExitAsync();
@@ -123,13 +97,8 @@ public static class WslHelper
         WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Importing your distribution ..."));
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments($"/c md {installDir} & wsl --import-in-place {distroName} {vhdxFilePath}")
-                .SetRedirectStandardOutput(true)
-                .SetRedirectStandardError(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.ReadOutputAndError, "cmd.exe",
+                $"/c md {installDir} & wsl --import-in-place {distroName} {vhdxFilePath}");
 
             process.Start();
             await process.WaitForExitAsync();
@@ -153,12 +122,8 @@ public static class WslHelper
         Log.Information($"Check running distribution for {distroName}");
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments("/c wsl --list --running --quiet")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.ReadOutput, "cmd.exe",
+                "/c wsl --list --running --quiet");
             process.Start();
 
             var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
@@ -180,12 +145,8 @@ public static class WslHelper
         Log.Information($"Check existing distribution for {distroName}");
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments("/c wsl --list --quiet")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.ReadOutput, "cmd.exe",
+                "/c wsl --list --quiet");
             process.Start();
 
             var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
@@ -208,12 +169,8 @@ public static class WslHelper
 
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments($"/c wsl --terminate {distroName}")
-                .SetRedirectStandardOutput(false)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.Background, "cmd.exe",
+                $"/c wsl --terminate {distroName}");
             process.Start();
             await process.WaitForExitAsync();
         }
@@ -229,12 +186,8 @@ public static class WslHelper
 
         try
         {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments($"/c wsl --shutdown")
-                .SetRedirectStandardOutput(false)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
+            var process = ProcessFactory.Create(ProcessType.Background, "cmd.exe",
+                "/c wsl --shutdown");
             process.Start();
             await process.WaitForExitAsync();
         }
