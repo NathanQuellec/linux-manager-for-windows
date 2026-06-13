@@ -5,6 +5,7 @@ A modern, open-source desktop application for managing Windows Subsystem for Lin
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Release](https://img.shields.io/github/v/release/NathanQuellec/linux-manager-for-windows)](https://github.com/NathanQuellec/linux-manager-for-windows/releases)
 [![Build Status](https://github.com/NathanQuellec/linux-manager-for-windows/actions/workflows/ci.yml/badge.svg)](https://github.com/NathanQuellec/linux-manager-for-windows/actions)
+[![CodeQL](https://github.com/NathanQuellec/linux-manager-for-windows/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/NathanQuellec/linux-manager-for-windows/actions/workflows/github-code-scanning/codeql)
 
 ## Overview
 
