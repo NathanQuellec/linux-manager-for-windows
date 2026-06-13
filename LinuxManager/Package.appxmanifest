@@ -51,7 +51,7 @@
 
           <com:Extension Category="windows.comServer">
               <com:ComServer>
-                  <com:ExeServer Executable="LinuxManager.exe" Arguments="----AppNotificationActivated:" DisplayName="Toast activator">
+                  <com:ExeServer Executable="Linux Manager.exe" Arguments="----AppNotificationActivated:" DisplayName="Toast activator">
                       <com:Class Id="083152C6-79F4-4B88-882E-A642ACCFAC48" DisplayName="Toast activator"/>
                   </com:ExeServer>
               </com:ComServer>
